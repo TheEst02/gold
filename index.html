@@ -2,16 +2,16 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>TES05</title>
+  <title>TES02</title>
   
-  <!-- Load full Leaflet Core Styles & Engines -->
-  <link rel="stylesheet" href="https://unpkg.com" />
-  <script src="https://unpkg.com"></script>
+  <!-- Load full Leaflet Core Styles & Engines via Cloudflare CDN -->
+  <link rel="stylesheet" href="https://cloudflare.com" />
+  <script src="https://cloudflare.com"></script>
 
   <!-- Performance Clustering Engines to scale up smoothly to 3,000+ points -->
-  <link rel="stylesheet" href="https://unpkg.com" />
-  <link rel="stylesheet" href="https://unpkg.com" />
-  <script src="https://unpkg.com"></script>
+  <link rel="stylesheet" href="https://cloudflare.com" />
+  <link rel="stylesheet" href="https://cloudflare.com" />
+  <script src="https://cloudflare.com"></script>
   
   <style>
     html, body, #map { height: 100%; margin: 0; padding: 0; background: #e5e5e5; }
@@ -26,7 +26,8 @@
 
   <script>
     // Initialize map canvas engine globally with valid backup coordinates
-    var map = L.map("map", { contextmenu: false }).setView([0, 0], 2);
+    var startingView = new Array(0, 0);
+    var map = L.map("map", { contextmenu: false }).setView(startingView, 2);
 
     // Secure, neutral base layer graphics from CartoDB
     L.tileLayer("https://{s}://{z}/{x}/{y}{r}.png", {
@@ -50,15 +51,15 @@
       "Default": "green"
     };
 
-    // Fixed custom icon builder with proper coordinate dimensions filled in
+    // Fixed custom icon builder using safe array allocations
     function getCustomIcon(colorName) {
       return L.icon({
         iconUrl: './' + colorName + '.png',
-        shadowUrl: 'https://unpkg.com',
-        iconSize:,
-        iconAnchor:,
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41]
+        shadowUrl: 'https://cloudflare.com',
+        iconSize: new Array(25, 41),
+        iconAnchor: new Array(12, 41),
+        popupAnchor: new Array(1, -34),
+        shadowSize: new Array(41, 41)
       });
     }
 
@@ -103,7 +104,10 @@
         });
 
         var allBounds = markersClusterGroup.getBounds();
-        if (allBounds.isValid()) { map.fitBounds(allBounds, { padding: [40, 40] }); }
+        if (allBounds.isValid()) { 
+          var edgePadding = new Array(40, 40);
+          map.fitBounds(allBounds, { padding: edgePadding }); 
+        }
       })
       .catch(function(err) { console.error(err); });
   </script>
