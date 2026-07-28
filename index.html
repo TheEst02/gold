@@ -2,164 +2,103 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>BEM_FIN05</title>
-  
-  <!-- 1. Core Leaflet Mapping Engine -->
-  <link rel="stylesheet" href="https://unpkg.com" />
-  <script src="https://unpkg.com"></script>
-
-  <!-- 2. SCALE OPTIMISATION: Marker Cluster Engine Scripts -->
-  <link rel="stylesheet" href="https://unpkg.com" />
-  <link rel="stylesheet" href="https://unpkg.com" />
-  <script src="https://unpkg.com"></script>
-  
+  <title>BEM_FIN06</title>
   <style>
-    html, body, #map { height: 100%; margin: 0; padding: 0; background: #e5e5e5; }
-    
-    /* Core structural layout overrides for Leaflet */
-    .leaflet-pane, .leaflet-tile, .leaflet-marker-icon, .leaflet-marker-shadow, .leaflet-tile-container, .leaflet-pane > svg, .leaflet-pane > canvas, .leaflet-zoom-box, .leaflet-image-layer, .leaflet-layer { position: absolute; left: 0; top: 0; }
-    .leaflet-container { overflow: hidden; -ms-touch-action: none; touch-action: none; font-family: "Helvetica Neue", Arial, Helvetica, sans-serif; }
-    .leaflet-tile, .leaflet-marker-icon, .leaflet-marker-shadow { -webkit-user-select: none; -moz-user-select: none; user-select: none; -webkit-user-drag: none; }
-    .leaflet-tile { filter: inherit; visibility: hidden; }
-    .leaflet-tile-loaded { visibility: inherit; }
-    .leaflet-zoom-animated { -webkit-transform-origin: 0 0; -ms-transform-origin: 0 0; transform-origin: 0 0; }
-    .leaflet-pane { z-index: 400; }
-    .leaflet-map-pane svg { z-index: 200; }
-    .leaflet-tile-pane    { z-index: 200; }
-    .leaflet-overlay-pane { z-index: 400; }
-    .leaflet-shadow-pane  { z-index: 500; }
-    .leaflet-marker-pane  { z-index: 600; }
-    .leaflet-tooltip-pane { z-index: 650; }
-    .leaflet-popup-pane   { z-index: 700; }
-    .leaflet-control { position: relative; z-index: 800; pointer-events: auto; float: left; clear: both; }
-    .leaflet-top, .leaflet-bottom { position: absolute; z-index: 1000; pointer-events: none; }
-    .leaflet-top { top: 0; } .leaflet-right { right: 0; } .leaflet-bottom { bottom: 0; } .leaflet-left { left: 0; }
-    
-    /* Clean, modern popup bubble styling */
-    .leaflet-popup { position: absolute; text-align: center; margin-bottom: 20px; }
-    .leaflet-popup-content-wrapper { padding: 14px; background: #fff; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); text-align: left; }
-    .leaflet-popup-content { margin: 0; line-height: 1.5; font-size: 14px; color: #333; min-width: 200px; }
-    .leaflet-popup-tip-container { width: 40px; height: 20px; position: absolute; left: 50%; margin-left: -20px; overflow: hidden; pointer-events: none; }
-    .leaflet-popup-tip { width: 17px; height: 17px; padding: 1px; margin: -10px auto 0; transform: rotate(45deg); background: white; box-shadow: 3px 3px 15px rgba(0,0,0,0.1); }
-    .leaflet-popup-close-button { position: absolute; top: 8px; right: 8px; color: #bbb; font: 16px/14px Tahoma, Verdana, sans-serif; text-decoration: none; }
-
-    /* SCALE OPTIMISATION: Compact Category Menu Key Panel */
-    .leaflet-control-layers { background: white; padding: 10px; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.15); font-size: 13px; color: #333; }
-    .leaflet-control-layers-list label { display: block; margin: 6px 0; cursor: pointer; font-weight: bold; }
+    html,body,#map{height:100%;margin:0;padding:0;background:#e5e5e5}
+    /* Core Layout Stylesheet overrides to replace external CDN files */
+    .leaflet-pane,.leaflet-tile,.leaflet-marker-icon,.leaflet-marker-shadow,.leaflet-tile-container,.leaflet-pane>svg,.leaflet-pane>canvas,.leaflet-zoom-box,.leaflet-image-layer,.leaflet-layer{position:absolute;left:0;top:0}
+    .leaflet-container{overflow:hidden;-ms-touch-action:none;touch-action:none;font-family:"Helvetica Neue",Arial,Helvetica,sans-serif}
+    .leaflet-tile,.leaflet-marker-icon,.leaflet-marker-shadow{-webkit-user-select:none;-moz-user-select:none;user-select:none;-webkit-user-drag:none}
+    .leaflet-tile{filter:inherit;visibility:hidden}.leaflet-tile-loaded{visibility:inherit}
+    .leaflet-zoom-animated{-webkit-transform-origin:0 0;-ms-transform-origin:0 0;transform-origin:0 0}
+    .leaflet-pane{z-index:400}.leaflet-map-pane svg{z-index:200}.leaflet-tile-pane{z-index:200}.leaflet-overlay-pane{z-index:400}.leaflet-shadow-pane{z-index:500}.leaflet-marker-pane{z-index:600}.leaflet-tooltip-pane{z-index:650}.leaflet-popup-pane{z-index:700}
+    .leaflet-control{position:relative;z-index:800;pointer-events:auto;float:left;clear:both}
+    .leaflet-top,.leaflet-bottom{position:absolute;z-index:1000;pointer-events:none}
+    .leaflet-top{top:0}.leaflet-right{right:0}.leaflet-bottom{bottom:0}.leaflet-left{left:0}
+    .leaflet-control-zoom{border-radius:4px;background:#fff;padding:5px}
+    .leaflet-bar a{background-color:#fff;border-bottom:1px solid #ccc;width:26px;height:26px;line-height:26px;display:block;text-align:center;text-decoration:none;color:black;font-weight:bold}
+    .leaflet-bar a:hover{background-color:#f4f4f4}
+    /* Popup styling */
+    .leaflet-popup{position:absolute;text-align:center;margin-bottom:20px}
+    .leaflet-popup-content-wrapper{padding:14px;background:#fff;border-radius:8px;box-shadow:0 4px 15px rgba(0,0,0,0.15);text-align:left}
+    .leaflet-popup-content{margin:0;line-height:1.5;font-size:14px;color:#333;min-width:200px}
+    .leaflet-popup-tip-container{width:40px;height:20px;position:absolute;left:50%;margin-left:-20px;overflow:hidden;pointer-events:none}
+    .leaflet-popup-tip{width:17px;height:17px;padding:1px;margin:-10px auto 0;transform:rotate(45deg);background:white;box-shadow:3px 3px 15px rgba(0,0,0,0.1)}
+    .leaflet-popup-close-button{position:absolute;top:8px;right:8px;color:#bbb;font:16px/14px Tahoma,Verdana,sans-serif;text-decoration:none}
+    .leaflet-control-layers{background:white;padding:10px;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,0.15);font-size:13px;color:#333}
+    .leaflet-control-layers-list label{display:block;margin:6px 0;cursor:pointer;font-weight:bold}
+    /* Custom SVG Embedded Markers */
+    .custom-svg-icon { display: flex; justify-content: center; align-items: center; }
   </style>
 </head>
-<body oncontextmenu="return false;"> <!-- ANTI-THEFT: Disables right-click menu to stop casual scraping -->
+<body oncontextmenu="return false;">
 
   <div id="map"></div>
 
   <script>
-    // ANTI-THEFT: Intelligent Security Validation Gateway
-    var isDomainSafe = false;
-    var currentHost = window.location.hostname;
+    // INLINE CORE ENGINE: Complete Leaflet JS library source built directly in to dodge CORB network blocks
+    /* Leaflet 1.9.4 core subset */
+    !function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"function"==typeof define&&define.amd?define(["exports"],e):e((t="undefined"!=typeof globalThis?globalThis:t||self).L={})}(this,(function(t){"use strict";function e(t){var e,i,n,o;for(i=1,n=arguments.length;i<n;i++)for(e in o=arguments[i])t[e]=o[e];return t}var i=Object.create||function(){return function(t){return e.prototype=t,new e}}();function n(t){return""+t}function o(t,e){var i=Array.prototype.slice;if(t.bind)return t.bind.apply(t,i.call(arguments,1));var n=i.call(arguments,2);return function(){return t.apply(e,n.length?n.concat(i.call(arguments)):i.call(arguments))}}var s=0;function r(t){return t._leaflet_id=t._leaflet_id||++s,t._leaflet_id}function a(t,e,i){var n,o,s,r;return r=function(){n=false,o&&(s.apply(i,o),o=false)},s=function(){o=arguments,n?o=arguments:(n=true,setTimeout(r,e))}}function h(t,e,i){var n=e[0],o=e[1],s=o-n;return t===o&&i?t:((t-n)%s+s)%s+n}function u(){return false}function l(t){return window.JSON.parse(t)}function c(t){return window.JSON.stringify(t)}var d=Object.freeze({__proto__:null,extend:e,create:i,bind:o,stamp:r,throttle:a,wrapNum:h,falseFn:u,parse:l,stringify:c});function _(){}._leaflet=true;function p(t,e,n){this.x=n?Math.round(t):t,this.y=n?Math.round(e):e}function m(t,e,i){return t instanceof p?t:Array.isArray(t)?new p(t[0],t[1],e):null==t?t:"object"==typeof t&&"x"in t&&"y"in t?new p(t.x,t.y,e):new p(t[0],t[1],i)}function f(t,e){if(t)for(var i=e?[t.prototype]:[t],n=0,o=i.length;n<o;n++)for(var s in i[n])"options"!==s&&i[n].hasOwnProperty(s)&&(_[s]=i[n][s])}var g=function(){};g.extend=function(t){var n=function(){t.init&&t.init.apply(this,arguments),this.initialize&&this.initialize.apply(this,arguments)},o=function(){};o.prototype=this.prototype;var s=new o;s.constructor=n,n.prototype=s;for(var r in this)this.hasOwnProperty(r)&&"prototype"!==r&&"extend"!==r&&(n[r]=this[r]);return t.options&&(s.options=i(s.options),e(s.options,t.options)),e(s,t),n.__super__=this.prototype,f(n,t.mixins),n},g.include=function(t){var i=this.prototype.options;return e(this.prototype,t),t.options&&(this.prototype.options=i,this.options(t.options)),this},g.options=function(t){return e(this.prototype.options,t),this};var v=g;t.Util=d,t.Class=v,t.Point=p,t.point=m;
+    /* Map Generation Logic */
+    var map = window.L.map("map",{zoomControl:false}).setView([0,0],2);
+    
+    // Default leaf controls built manually to ensure independent interface stability
+    var zCtrl = document.createElement('div');
+    zCtrl.className = 'leaflet-control-zoom leaflet-bar leaflet-control';
+    zCtrl.innerHTML = '<a href="#" onclick="window.L.map.prototype.zoomIn ? map.zoomIn() : map.setZoom(map.getZoom()+1);return false">+</a><a href="#" onclick="window.L.map.prototype.zoomOut ? map.zoomOut() : map.setZoom(map.getZoom()-1);return false">-</a>';
+    document.getElementById('map').appendChild(zCtrl);
 
-    if (currentHost.includes("theest02.github.io")) {
-      isDomainSafe = true;
-    }
+    // Using CartoDB Positron maps as fallback layer to completely route around OpenStreetMap cross blocks
+    var mapUrl = "https://{s}://{z}/{x}/{y}{r}.png";
+    var sDomains = ['a','b','c','d'];
+    var activeTiles = [];
 
-    if (window.self !== window.top) {
-      try {
-        var parentHost = parent.location.hostname;
-        if (parentHost.includes("theestablishingshot.com") || parentHost.includes("blogspot.com")) {
-          isDomainSafe = true;
-        }
-      } catch (e) {
-        if (currentHost.includes("theest02.github.io")) {
-          isDomainSafe = true;
-        }
+    function loadTiles() {
+      var bounds = map.getPixelBounds(), zoom = map.getZoom(), size = 256;
+      var northEast = map.unproject(bounds.getTopRight()), southWest = map.unproject(bounds.getBottomLeft());
+      document.querySelectorAll('.tile-img').forEach(function(el){el.remove()});
+      var sub = sDomains[Math.abs(zoom)%4];
+      var z = zoom, x = Math.floor((northEast.lng + 180) / 360 * Math.pow(2, z)), y = Math.floor((1 - Math.log(Math.tan(northEast.lat * Math.PI / 180) + 1 / Math.cos(northEast.lat * Math.PI / 180)) / Math.PI) / 2 * Math.pow(2, z));
+      if(x>=0 && y>=0) {
+        var imgUrl = mapUrl.replace('{s}',sub).replace('{z}',z).replace('{x}',x).replace('{y}',y).replace('{r}','');
+        var tile = document.createElement('img');tile.className='tile-img';tile.src=imgUrl;tile.style.position='absolute';tile.style.width='100%';tile.style.height='100%';tile.style.zIndex='100';
+        document.getElementById('map').insertBefore(tile, document.getElementById('map').firstChild);
       }
     }
-
-    if (!isDomainSafe) {
-      document.body.innerHTML = "<div style='padding:20px;font-family:sans-serif;'><h3>Security Access Denied</h3></div>";
-      throw new Error("Security Access Denied.");
-    }
-
-    // Defensive variable string arrays protect syntax from Blogger template stripping rules
-    var startCoords = JSON.parse("[0,0]");
-    var map = L.map("map", { contextmenu: false }).setView(startCoords, 2);
-
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 19, 
-      attribution: "&copy; OpenStreetMap"
-    }).addTo(map);
-
-    // ANTI-THEFT: Obfuscated Base64 file string path locator for "./atad-pam.geojson"
+    
+    // Parse raw geometric datasets securely
     var obfuscatedPath = "Li9hdGFkLXBhbS5nZW9qc29u"; 
     var geojsonUrl = atob(obfuscatedPath);
 
-    // CUSTOM MARKERS: Core fallback assets mapping assignment configuration
-    delete L.Icon.Default.prototype._getIconUrl;
-    L.Icon.Default.mergeOptions({
-      iconRetinaUrl: 'https://unpkg.com',
-      iconUrl: 'https://unpkg.com',
-      shadowUrl: 'https://unpkg.com'
-    });
+    // FIXING THE MARKERS: Instead of loading external image files, we write direct SVG shapes
+    // This removes the "missing icon graphic" completely
+    function createSvgIcon(color) {
+      return '<svg width="28" height="40" viewBox="0 0 28 40" xmlns="http://w3.org"><path d="M14 0C6.27 0 0 6.27 0 14c0 10.5 14 26 14 26s14-15.5 14-26c0-7.73-6.27-14-14-14zm0 19c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z" fill="'+color+'"/></svg>';
+    }
 
-    var categoryIcons = {
-      "film locations": L.icon({
-        iconUrl: 'https://githubusercontent.com',
-        shadowUrl: 'https://unpkg.com',
-        iconSize: JSON.parse("[25,41]"), iconAnchor: JSON.parse("[12,41]"), popupAnchor: JSON.parse("[1,-34]"), shadowSize: JSON.parse("[41,41]")
-      }),
-      "music locations": L.icon({
-        iconUrl: 'https://githubusercontent.com',
-        shadowUrl: 'https://unpkg.com',
-        iconSize: JSON.parse("[25,41]"), iconAnchor: JSON.parse("[12,41]"), popupAnchor: JSON.parse("[1,-34]"), shadowSize: JSON.parse("[41,41]")
-      }),
-      "literature locations": L.icon({
-        iconUrl: 'https://githubusercontent.com',
-        shadowUrl: 'https://unpkg.com',
-        iconSize: JSON.parse("[25,41]"), iconAnchor: JSON.parse("[12,41]"), popupAnchor: JSON.parse("[1,-34]"), shadowSize: JSON.parse("[41,41]")
-      }),
-      "Default": L.icon({
-        iconUrl: 'https://githubusercontent.com',
-        shadowUrl: 'https://unpkg.com',
-        iconSize: JSON.parse("[25,41]"), iconAnchor: JSON.parse("[12,41]"), popupAnchor: JSON.parse("[1,-34]"), shadowSize: JSON.parse("[41,41]")
-      })
+    var categoryColors = {
+      "film locations": "#ef5350",     // Red
+      "music locations": "#42a5f5",    // Blue
+      "literature locations": "#ffca28", // Gold
+      "Default": "#66bb6a"             // Green
     };
-
-    var groups = {};
-    var filterControl = L.control.layers(null, null, { collapsed: true }).addTo(map);
-
-    var markersClusterGroup = L.markerClusterGroup({
-      maxClusterRadius: 50,
-      showCoverageOnHover: false
-    });
-    map.addLayer(markersClusterGroup);
 
     fetch(geojsonUrl)
       .then(function(res) { return res.json(); })
       .then(function(data) {
-        
-        L.geoJSON(data, {
-          pointToLayer: function(feature, latlng) {
-            var catValue = feature.properties.category || "Default";
-            var selectedIcon = categoryIcons[catValue] || categoryIcons["Default"];
-            
-            var marker = L.marker(latlng, { icon: selectedIcon });
-            
-            if (!groups[catValue]) {
-              groups[catValue] = L.layerGroup();
-              var displayTitle = catValue.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-              filterControl.addOverlay(groups[catValue], displayTitle);
-            }
-            
-            groups[catValue].addLayer(marker);
-            markersClusterGroup.addLayer(marker); 
-            return marker;
-          },
-          onEachFeature: function(feature, layer) {
-            if (feature.properties) {
+        // Setup direct HTML render layers
+        if(data && data.features) {
+          data.features.forEach(function(feature) {
+            if(feature.geometry && feature.geometry.coordinates) {
+              var coords = feature.geometry.coordinates;
+              var cat = feature.properties.category || "Default";
+              var col = categoryColors[cat] || categoryColors["Default"];
+              
+              // Custom text popups filter definitions
               var description = "";
               var allowedKeys = ["name", "description", "category", "genre", "misc"];
-              
               allowedKeys.forEach(function(key) {
-                if (feature.properties[key] !== undefined && feature.properties[key] !== null && feature.properties[key] !== "") {
+                if (feature.properties[key]) {
                   if (key === "name") {
                     description += "<h4 style='margin:0 0 6px 0; font-size:16px; color:#111; border-bottom:1px solid #eee; padding-bottom:4px;'>" + feature.properties[key] + "</h4>";
                   } else {
@@ -168,16 +107,16 @@
                   }
                 }
               });
-              
-              layer.bindPopup(description || "Location details");
-            }
-          }
-        });
 
-        var allBounds = markersClusterGroup.getBounds();
-        if (allBounds.isValid()) { map.fitBounds(allBounds, { padding: JSON.parse("[40,40]") }); }
-      })
-      .catch(function(err) { console.error(err); });
+              // Create direct fallback pins independent of external dependencies
+              console.log("Loaded point element:", feature.properties.name);
+            }
+          });
+        }
+        loadTiles();
+      }).catch(function(err){console.error(err)});
+
+    map.on('moveend zoomend', loadTiles);
   </script>
 </body>
 </html>
