@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Blogger Embed Map abpc 1</title>
+  <title>Blogger Embed Map apc02</title>
   
   <style>
     html, body, #map { height: 100%; margin: 0; padding: 0; background: #e5e5e5; }
@@ -29,34 +29,33 @@
     /* Clean, modern popup bubble styling */
     .leaflet-popup { position: absolute; text-align: center; margin-bottom: 20px; }
     .leaflet-popup-content-wrapper { padding: 14px; background: #fff; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); text-align: left; }
-    .leaflet-popup-content { margin: 0; line-height: 1.5; font-size: 14px; color: #333; min-width: 150px; }
+    .leaflet-popup-content { margin: 0; line-height: 1.5; font-size: 14px; color: #333; min-width: 180px; }
     .leaflet-popup-tip-container { width: 40px; height: 20px; position: absolute; left: 50%; margin-left: -20px; overflow: hidden; pointer-events: none; }
     .leaflet-popup-tip { width: 17px; height: 17px; padding: 1px; margin: -10px auto 0; transform: rotate(45deg); background: white; box-shadow: 3px 3px 15px rgba(0,0,0,0.1); }
     .leaflet-popup-close-button { position: absolute; top: 8px; right: 8px; color: #bbb; font: 16px/14px Tahoma, Verdana, sans-serif; text-decoration: none; }
 
     /* Custom Category Key Menu Styling */
-    .leaflet-control-layers { background: white; padding: 10px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); font-size: 13px; font-weight: bold; }
-    .leaflet-control-layers-list label { display: block; margin: 4px 0; cursor: pointer; }
+    .leaflet-control-layers { background: white; padding: 10px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); font-size: 13px; font-weight: bold; color: #333; }
+    .leaflet-control-layers-list label { display: block; margin: 6px 0; cursor: pointer; }
   </style>
 
   <script src="https://unpkg.com"></script>
 </head>
-<body oncontextmenu="return false;"> <!-- SECURITY: Disables standard mouse right-click data inspecting -->
+<body oncontextmenu="return false;"> <!-- ANTI-THEFT: Disables right-click menu to stop data inspecting -->
 
   <div id="map"></div>
 
   <script>
-    // SECURITY: Domain Lockout System
-    // Crashes script execution if anyone tries to frame or copy your map page on another website
+    // ANTI-THEFT: Domain Lockout System
+    // Crashes map script execution if framed anywhere outside your custom blog setup
     var allowedHost = "://blogspot.com";
     if (window.self !== window.top) {
       try {
         if (!parent.location.hostname.includes(allowedHost)) {
           document.body.innerHTML = "";
-          throw new Error("Unauthorized frame domain access restriction.");
+          throw new Error("Unauthorized domain deployment.");
         }
       } catch (e) {
-        // Blocks display if cross-domain policies hide parent domain (external unauthorized thieves)
         document.body.innerHTML = "";
       }
     }
@@ -68,32 +67,37 @@
       attribution: "&copy; OpenStreetMap"
     }).addTo(map);
 
-    // ANTI-THEFT: Base64 obfuscated file locator string representing "./atad-pam.geojson"
+    // ANTI-THEFT: Obfuscated Base64 file string path locator for "./atad-pam.geojson"
     var obfuscatedPath = "Li9hdGFkLXBhbS5nZW9qc29u"; 
     var geojsonUrl = atob(obfuscatedPath);
 
-    // CATEGORY CONFIGURATION: Map specific categories to custom map marker icons
-    // Replace "Group A" with your real GeoJSON category field values
+    // CUSTOM MARKERS: Maps category groups to clean, professional color variants
+    // Customize your exact category values below (case-sensitive matching your GeoJSON)
     var categoryIcons = {
-      "Group A": L.icon({
+      "Group 1": L.icon({
         iconUrl: 'https://githubusercontent.com',
         shadowUrl: 'https://unpkg.com',
-        iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        iconSize:, iconAnchor:, popupAnchor: [1, -34], shadowSize: [41, 41]
       }),
-      "Group B": L.icon({
+      "Group 2": L.icon({
         iconUrl: 'https://githubusercontent.com',
         shadowUrl: 'https://unpkg.com',
-        iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        iconSize:, iconAnchor:, popupAnchor: [1, -34], shadowSize: [41, 41]
+      }),
+      "Group 3": L.icon({
+        iconUrl: 'https://githubusercontent.com',
+        shadowUrl: 'https://unpkg.com',
+        iconSize:, iconAnchor:, popupAnchor: [1, -34], shadowSize: [41, 41]
       }),
       "Default": L.icon({
         iconUrl: 'https://githubusercontent.com',
         shadowUrl: 'https://unpkg.com',
-        iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        iconSize:, iconAnchor:, popupAnchor: [1, -34], shadowSize: [41, 41]
       })
     };
 
-    // Keep track of our different interactive filter layers
     var groups = {};
+    // Creates the interactive toggle switcher overlay control panel
     var filterControl = L.control.layers(null, null, { collapsed: false }).addTo(map);
 
     fetch(geojsonUrl)
@@ -102,14 +106,13 @@
         
         L.geoJSON(data, {
           pointToLayer: function(feature, latlng) {
-            // TARGET FIELD: Reads your category classification column name
-            // Change "category" to match your exact GeoJSON property key (case-sensitive)
-            var catValue = feature.properties.category || feature.properties.Category || "Default";
+            // Target specific property "category" to split group layers
+            var catValue = feature.properties.category || "Default";
             var selectedIcon = categoryIcons[catValue] || categoryIcons["Default"];
             
             var marker = L.marker(latlng, { icon: selectedIcon });
             
-            // Allocate marker dynamically into its designated group array
+            // Build groups dynamically based on file inputs
             if (!groups[catValue]) {
               groups[catValue] = L.layerGroup().addTo(map);
               filterControl.addOverlay(groups[catValue], catValue);
@@ -121,29 +124,29 @@
             if (feature.properties) {
               var description = "";
               
-              // POPUP CLEANUP: Explicit Whitelist
-              // Put the EXACT properties you want to show inside this array.
-              // Everything else in your GeoJSON data structure will be strictly skipped.
-              var allowedKeys = ["Name", "Description", "Year"]; 
+              // POPUP CLEANUP: Explicit layout whitelist filter configuration
+              var allowedKeys = ["name", "description", "category", "genre", "misc"];
               
               allowedKeys.forEach(function(key) {
-                if (feature.properties[key] !== undefined) {
-                  if (key === "Name") {
-                    description += "<h4 style='margin:0 0 6px 0; font-size:15px; color:#111;'>" + feature.properties[key] + "</h4>";
+                if (feature.properties[key] !== undefined && feature.properties[key] !== null) {
+                  // Format 'name' cleanly like a bold headline
+                  if (key === "name") {
+                    description += "<h4 style='margin:0 0 6px 0; font-size:16px; color:#111; border-bottom:1px solid #eee; padding-bottom:4px;'>" + feature.properties[key] + "</h4>";
                   } else {
-                    description += "<strong>" + key + ":</strong> " + feature.properties[key] + "<br>";
+                    // Capitalise the labels inside the popup box output layout automatically
+                    var label = key.charAt(0).toUpperCase() + key.slice(1);
+                    description += "<strong>" + label + ":</strong> " + feature.properties[key] + "<br>";
                   }
                 }
               });
               
-              layer.bindPopup(description || "No public data properties specified.");
+              layer.bindPopup(description || "No descriptions available.");
             }
           }
         });
 
-        // Set viewport boundaries dynamically based on total active markers loaded
         var allBounds = L.featureGroup(Object.values(groups)).getBounds();
-        if (allBounds.isValid()) { map.fitBounds(allBounds, { padding: [30, 30] }); }
+        if (allBounds.isValid()) { map.fitBounds(allBounds, { padding: [40, 40] }); }
       })
       .catch(function(err) { console.error(err); });
   </script>
