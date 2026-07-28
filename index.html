@@ -2,41 +2,58 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Blogger Embed Map 2</title>
-  <!-- Load Leaflet Stylesheets and JS Engine -->
-  <link rel="stylesheet" href="https://unpkg.com" />
-  <script src="https://unpkg.com"></script>
+  <title>Blogger Embed Map</title>
+  
+  <!-- Inline Leaflet Core Structural Styles to bypass browser URL blocks -->
   <style>
-    /* Force full-bleed viewport so the container doesn't collapse to 0 pixels */
     html, body, #map { height: 100%; margin: 0; padding: 0; background: #e5e5e5; }
+    .leaflet-pane, .leaflet-tile, .leaflet-marker-icon, .leaflet-marker-shadow, .leaflet-tile-container, .leaflet-pane > svg, .leaflet-pane > canvas, .leaflet-zoom-box, .leaflet-image-layer, .leaflet-layer { position: absolute; left: 0; top: 0; }
+    .leaflet-container { overflow: hidden; -ms-touch-action: none; touch-action: none; font-family: "Helvetica Neue", Arial, Helvetica, sans-serif; }
+    .leaflet-tile, .leaflet-marker-icon, .leaflet-marker-shadow { -webkit-user-select: none; -moz-user-select: none; user-select: none; -webkit-user-drag: none; }
+    .leaflet-tile { filter: inherit; visibility: hidden; }
+    .leaflet-tile-loaded { visibility: inherit; }
+    .leaflet-zoom-animated { -webkit-transform-origin: 0 0; -ms-transform-origin: 0 0; transform-origin: 0 0; }
+    .leaflet-pane { z-index: 400; }
+    .leaflet-map-pane svg { z-index: 200; }
+    .leaflet-tile-pane    { z-index: 200; }
+    .leaflet-overlay-pane { z-index: 400; }
+    .leaflet-shadow-pane  { z-index: 500; }
+    .leaflet-marker-pane  { z-index: 600; }
+    .leaflet-tooltip-pane { z-index: 650; }
+    .leaflet-popup-pane   { z-index: 700; }
+    .leaflet-vml-shape { width: 1px; height: 1px; }
+    .lvml { behavior: url(#default#VML); display: inline-block; position: absolute; }
+    .leaflet-control { position: relative; z-index: 800; pointer-events: auto; float: left; clear: both; }
+    .leaflet-top, .leaflet-bottom { position: absolute; z-index: 1000; pointer-events: none; }
+    .leaflet-top { top: 0; } .leaflet-right { right: 0; } .leaflet-bottom { bottom: 0; } .leaflet-left { left: 0; }
   </style>
+
+  <!-- Load the JavaScript Engine (Always enforces strict HTTPS) -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
 
   <div id="map"></div>
 
   <script>
-    // Initialize map safely with a global fallback coordinate structure
-    var map = L.map("map").setView([20, 0], 2);
+    // Safe initialization using hard strings to stop Blogger parser stripping
+    var map = L.map("map").setView([0, 0], 2);
 
-    // Load OpenStreetMap map tiles
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19, 
-      attribution: "&copy; OpenStreetMap contributors"
+      attribution: "&copy; OpenStreetMap"
     }).addTo(map);
 
-    // Relative link safely pulls from the same repository folder path
     var geojsonUrl = "./atad-pam.geojson";
 
     fetch(geojsonUrl)
       .then(function(res) {
-        if (!res.ok) throw new Error("HTTP error! Status: " + res.status);
+        if (!res.ok) throw new Error("File fetch failed: " + res.status);
         return res.json();
       })
       .then(function(data) {
         var layer = L.geoJSON(data, {
           onEachFeature: function(feature, layer) {
-            // Check if properties exist to prevent undefined popup crashes
             if (feature.properties) {
               var description = "";
               for (var key in feature.properties) {
@@ -44,20 +61,18 @@
                   description += "<strong>" + key + ":</strong> " + feature.properties[key] + "<br>";
                 }
               }
-              layer.bindPopup(description || "No data attributes.");
+              layer.bindPopup(description || "Location point details");
             }
           }
         }).addTo(map);
 
-        // Safely adjust view boundaries only if coordinates parsed correctly
         if (layer.getBounds().isValid()) {
-          map.fitBounds(layer.getBounds(), { padding: [30, 30] });
+          map.fitBounds(layer.getBounds());
         }
       })
       .catch(function(err) {
-        console.error("Map parsing failed:", err);
-        // Show the precise error directly on screen for easy debugging
-        document.body.innerHTML = "<div style='padding:25px; font-family:sans-serif; color:#721c24; background:#f8d7da;'><h3>Map Render Failure</h3><p>" + err.message + "</p></div>";
+        console.error(err);
+        document.body.innerHTML = "<div style='padding:20px; color:red; font-family:sans-serif;'><h3>Data Error</h3><p>" + err.message + "</p></div>";
       });
   </script>
 </body>
