@@ -2,9 +2,9 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>TES02</title>
+  <title>TES03</title>
   
-  <!-- Load full CDN resources (Allowed natively on github.io hosting environments) -->
+  <!-- Load full Leaflet Core Styles & Engines -->
   <link rel="stylesheet" href="https://unpkg.com" />
   <script src="https://unpkg.com"></script>
 
@@ -28,10 +28,10 @@
     // Initialize map canvas engine globally
     var map = L.map("map", { contextmenu: false }).setView([0, 0], 2);
 
-    // Clean neutral base layer graphics
-    L.tileLayer("https://{s}://{z}/{x}/{y}{r}.png", {
+    // Repaired secure, neutral base layer graphics
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
       maxZoom: 19,
-      attribution: "&copy; CartoDB"
+      attribution: "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors &copy; <a href='https://carto.com'>CARTO</a>"
     }).addTo(map);
 
     // Dynamic filtering switcher control layout configured to fold cleanly automatically
@@ -50,11 +50,15 @@
       "Default": "green"
     };
 
+    // Repaired custom icon builder with proper parameters and safe relative URLs
     function getCustomIcon(colorName) {
       return L.icon({
-        iconUrl: 'https://githubusercontent.com' + colorName + '.png',
+        iconUrl: './' + colorName + '.png',
         shadowUrl: 'https://unpkg.com',
-        iconSize:, iconAnchor:, popupAnchor: [1, -34], shadowSize: [41, 41]
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
       });
     }
 
