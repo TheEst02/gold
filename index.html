@@ -2,7 +2,16 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>BEMap_fin_02</title>
+  <title>BEM_fin03</title>
+  
+  <!-- 1. Core Leaflet Mapping Engine -->
+  <link rel="stylesheet" href="https://unpkg.com" />
+  <script src="https://unpkg.com"></script>
+
+  <!-- 2. SCALE OPTIMISATION: Marker Cluster Engine Scripts -->
+  <link rel="stylesheet" href="https://unpkg.com" />
+  <link rel="stylesheet" href="https://unpkg.com" />
+  <script src="https://unpkg.com"></script>
   
   <style>
     html, body, #map { height: 100%; margin: 0; padding: 0; background: #e5e5e5; }
@@ -34,30 +43,42 @@
     .leaflet-popup-tip { width: 17px; height: 17px; padding: 1px; margin: -10px auto 0; transform: rotate(45deg); background: white; box-shadow: 3px 3px 15px rgba(0,0,0,0.1); }
     .leaflet-popup-close-button { position: absolute; top: 8px; right: 8px; color: #bbb; font: 16px/14px Tahoma, Verdana, sans-serif; text-decoration: none; }
 
-    /* Custom Category Key Menu Styling */
-    .leaflet-control-layers { background: white; padding: 12px; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.15); font-size: 13px; font-weight: bold; color: #333; }
-    .leaflet-control-layers-list label { display: block; margin: 6px 0; cursor: pointer; }
+    /* SCALE OPTIMISATION: Compact Category Menu Key Panel */
+    .leaflet-control-layers { background: white; padding: 10px; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.15); font-size: 13px; color: #333; }
+    .leaflet-control-layers-list label { display: block; margin: 6px 0; cursor: pointer; font-weight: bold; }
   </style>
-
-  <script src="https://unpkg.com"></script>
 </head>
-<body oncontextmenu="return false;"> <!-- ANTI-THEFT: Disables right-click menu to stop data inspecting -->
+<body oncontextmenu="return false;"> <!-- ANTI-THEFT: Disables right-click menu to stop casual scraping -->
 
   <div id="map"></div>
 
   <script>
-    // ANTI-THEFT: Domain Lockout System
-    // Crashes map script execution if framed anywhere outside your custom blog setup
-var allowedHost = "://blogspot.com";
-    if (window.self !== window.top) {
+    // ANTI-THEFT: Expanded Safe Domain Allowed List Check
+    var allowedDomains = ["theestablishingshot.com", "github.io", "blogspot.com"];
+    var isDomainSafe = false;
+
+    if (window.self === window.top) {
+      // Direct access checking
+      allowedDomains.forEach(function(domain) {
+        if (window.location.hostname.includes(domain)) { isDomainSafe = true; }
+      });
+    } else {
+      // Iframe execution environment safety checking
       try {
-        if (!parent.location.hostname.includes(allowedHost)) {
-          document.body.innerHTML = "";
-          throw new Error("Unauthorized domain deployment.");
-        }
+        var parentHost = parent.location.hostname;
+        allowedDomains.forEach(function(domain) {
+          if (parentHost.includes(domain)) { isDomainSafe = true; }
+        });
       } catch (e) {
-        document.body.innerHTML = "";
+        // If security constraints hide parent domain, fallback to internal script path verification
+        if (window.location.hostname.includes("github.io")) { isDomainSafe = true; }
       }
+    }
+
+    // Force application failure if running on a pirate domain copycat
+    if (!isDomainSafe) {
+      document.body.innerHTML = "";
+      throw new Error("Security Access Denied.");
     }
 
     var map = L.map("map", { contextmenu: false }).setView([0, 0], 2);
@@ -71,7 +92,7 @@ var allowedHost = "://blogspot.com";
     var obfuscatedPath = "Li9hdGFkLXBhbS5nZW9qc29u"; 
     var geojsonUrl = atob(obfuscatedPath);
 
-    // CUSTOM MARKERS: Maps your exact categories to unique visual markers
+    // CUSTOM MARKERS: Category-to-icon mapping assignment configuration
     var categoryIcons = {
       "film locations": L.icon({
         iconUrl: 'https://githubusercontent.com',
@@ -96,8 +117,16 @@ var allowedHost = "://blogspot.com";
     };
 
     var groups = {};
-    // Creates the interactive toggle switcher overlay control panel
-    var filterControl = L.control.layers(null, null, { collapsed: false }).addTo(map);
+    
+    // SCALE OPTIMISATION: Changed collapsed to true so 40 categories fold elegantly out of view 
+    var filterControl = L.control.layers(null, null, { collapsed: true }).addTo(map);
+
+    // SCALE OPTIMISATION: Cluster cluster group initialization handles high quantities safely
+    var markersClusterGroup = L.markerClusterGroup({
+      maxClusterRadius: 50,
+      showCoverageOnHover: false
+    });
+    map.addLayer(markersClusterGroup);
 
     fetch(geojsonUrl)
       .then(function(res) { return res.json(); })
@@ -105,50 +134,48 @@ var allowedHost = "://blogspot.com";
         
         L.geoJSON(data, {
           pointToLayer: function(feature, latlng) {
-            // Target specific property "category" to split group layers
             var catValue = feature.properties.category || "Default";
             var selectedIcon = categoryIcons[catValue] || categoryIcons["Default"];
             
             var marker = L.marker(latlng, { icon: selectedIcon });
             
-            // Build groups dynamically based on file inputs and format key label nicely
+            // Allocate categories to toggleable target filters dynamically
             if (!groups[catValue]) {
-              groups[catValue] = L.layerGroup().addTo(map);
-              
-              // Capitalise group names for the key interface panel layout
+              groups[catValue] = L.layerGroup();
               var displayTitle = catValue.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
               filterControl.addOverlay(groups[catValue], displayTitle);
             }
+            
             groups[catValue].addLayer(marker);
+            markersClusterGroup.addLayer(marker); // Pushes processing load into performance cluster mode
             return marker;
           },
           onEachFeature: function(feature, layer) {
             if (feature.properties) {
               var description = "";
               
-              // POPUP CLEANUP: Explicit layout whitelist filter configuration
+              // POPUP FILTER WHITELIST: Explicit property definitions
               var allowedKeys = ["name", "description", "category", "genre", "misc"];
               
               allowedKeys.forEach(function(key) {
                 if (feature.properties[key] !== undefined && feature.properties[key] !== null && feature.properties[key] !== "") {
-                  // Format 'name' cleanly like a bold headline
                   if (key === "name") {
                     description += "<h4 style='margin:0 0 6px 0; font-size:16px; color:#111; border-bottom:1px solid #eee; padding-bottom:4px;'>" + feature.properties[key] + "</h4>";
                   } else {
-                    // Capitalise the labels inside the popup box output layout automatically
                     var label = key.charAt(0).toUpperCase() + key.slice(1);
                     description += "<p style='margin:4px 0;'><strong>" + label + ":</strong> " + feature.properties[key] + "</p>";
                   }
                 }
               });
               
-              layer.bindPopup(description || "No descriptions available.");
+              layer.bindPopup(description || "Location details");
             }
           }
         });
 
-        var allBounds = L.featureGroup(Object.values(groups)).getBounds();
-        if (allBounds.isValid()) { map.fitBounds(allBounds, { padding: [40, 40] }); }
+        // Safe boundaries rendering
+        var allBounds = markersClusterGroup.getBounds();
+        if (allBounds.isValid()) { map.fitBounds(allBounds, { padding: [30, 30] }); }
       })
       .catch(function(err) { console.error(err); });
   </script>
