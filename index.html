@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>TES03</title>
+  <title>TES04</title>
   
   <!-- Load full Leaflet Core Styles & Engines -->
   <link rel="stylesheet" href="https://unpkg.com" />
@@ -28,10 +28,10 @@
     // Initialize map canvas engine globally
     var map = L.map("map", { contextmenu: false }).setView([0, 0], 2);
 
-    // Repaired secure, neutral base layer graphics
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+    // Repaired secure, neutral base layer graphics from CartoDB
+    L.tileLayer("https://{s}://{z}/{x}/{y}{r}.png", {
       maxZoom: 19,
-      attribution: "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors &copy; <a href='https://carto.com'>CARTO</a>"
+      attribution: "&copy; <a href='https://openstreetmap.org'>OpenStreetMap</a> contributors &copy; <a href='https://carto.com'>CARTO</a>"
     }).addTo(map);
 
     // Dynamic filtering switcher control layout configured to fold cleanly automatically
@@ -50,7 +50,7 @@
       "Default": "green"
     };
 
-    // Repaired custom icon builder with proper parameters and safe relative URLs
+    // Repaired custom icon builder with standard coordinate dimensions
     function getCustomIcon(colorName) {
       return L.icon({
         iconUrl: './' + colorName + '.png',
