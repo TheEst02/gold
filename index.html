@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>TES10</title>
+  <title>TES11</title>
 
   <!-- Leaflet Core -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -80,6 +80,32 @@ function addMarkerToBroadCluster(feature, marker) {
   broadClusters[cat].addLayer(marker);
 }
 
+    // Sub-category (using "genre") → tinted colour map
+var subCategoryColors = {};
+
+function getSubCategoryColor(feature) {
+  var broad = feature.properties.category;
+  var sub = feature.properties.genre || "Default";
+
+  // If already generated, return it
+  if (subCategoryColors[sub]) return subCategoryColors[sub];
+
+  // Generate a tint factor based on string hash
+  var hash = 0;
+  for (var i = 0; i < sub.length; i++) {
+    hash = (hash << 5) - hash + sub.charCodeAt(i);
+    hash |= 0;
+  }
+
+  var factor = ((hash % 100) / 100);
+  if (factor < 0) factor = -factor;
+
+  var baseColor = broadCategoryColors[broad] || "#888888";
+  var tinted = tintColor(baseColor, factor * 0.5);
+
+  subCategoryColors[sub] = tinted;
+  return tinted;
+}
 
     var markerColors = {
       "film location": "red",
@@ -103,7 +129,7 @@ function addMarkerToBroadCluster(feature, marker) {
         L.geoJSON(data, {
           pointToLayer: function(feature, latlng) {
             var catValue = feature.properties.category || "Default";
-            var clr = markerColors[catValue] || markerColors["Default"];
+         var clr = getSubCategoryColor(feature);
             var marker = L.marker(latlng, { icon: getCustomIcon(clr) });
 
   if (!groups[catValue]) {
