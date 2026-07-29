@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>TES29</title>
+  <title>TES30</title>
 
   <!-- Leaflet Core -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -179,7 +179,7 @@ var titleIcons = {};
     popupAnchor: [0, -28]
   });
 }    
-    fetch("./atad-pam.geojson")
+    fetch("atad-pam.geojson")
       .then(res => res.json())
       .then(data => {
         L.geoJSON(data, {
