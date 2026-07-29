@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>TES20</title>
+  <title>TES21</title>
 
   <!-- Leaflet Core -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -144,15 +144,27 @@
           pointToLayer: function(feature, latlng) {
             var catValue = feature.properties.category || "Default";
             var clr = getSubCategoryColor(feature);
- var iconUrl = feature.properties.icon;
+var iconUrl = feature.properties.finger;
+var genre = feature.properties.genre;
 
-// If GeoJSON provides an icon → use it
-// Otherwise → use tinted colour icon
-var icon = iconUrl
-  ? getCustomIcon(iconUrl)
-  : getCustomIcon('./' + clr + '.png');
+// Priority:
+// 1. GeoJSON-provided icon (finger)
+// 2. Film/book title icon (if defined)
+// 3. Tinted fallback icon
+var finalIconUrl =
+  iconUrl ||
+  titleIcons[genre] ||
+  './' + clr + '.png';
+
+var icon = L.icon({
+  iconUrl: finalIconUrl,
+  iconSize: [32, 32],
+  iconAnchor: [16, 32],
+  popupAnchor: [0, -28]
+});
 
 var marker = L.marker(latlng, { icon: icon });
+
 
 
             if (!groups[catValue]) {
@@ -168,19 +180,24 @@ var marker = L.marker(latlng, { icon: icon });
 
             return marker;
           },
-          onEachFeature: function(feature, layer) {
-            var description = "";
-            ["name", "description", "category", "genre", "misc"].forEach(function(key) {
-              if (feature.properties[key]) {
-                if (key === "name") {
-                  description += "<h4>" + feature.properties[key] + "</h4>";
-                } else {
-                  description += "<p><strong>" + key + ":</strong> " + feature.properties[key] + "</p>";
-                }
-              }
-            });
-            layer.bindPopup(description || "Location details");
-          }
+        onEachFeature: function(feature, layer) {
+  var p = feature.properties;
+
+  var html = `
+    <div class="popup">
+      <h4>${p.name || "Untitled Location"}</h4>
+
+      ${p.description ? `<p><strong>Scene:</strong> ${p.description}</p>` : ""}
+      ${p.misc ? `<p><strong>Episode:</strong> ${p.misc}</p>` : ""}
+      ${p.genre ? `<p><strong>Franchise:</strong> ${p.genre}</p>` : ""}
+      ${p.category ? `<p><strong>Category:</strong> ${p.category}</p>` : ""}
+      ${p.popeye ? `<p><strong>Real Location:</strong> ${p.popeye}</p>` : ""}
+    </div>
+  `;
+
+  layer.bindPopup(html);
+}
+
         });
 
         // Compute bounds from all broad clusters
