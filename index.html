@@ -2,11 +2,16 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>TES23</title>
+  <title>TES24</title>
 
   <!-- Leaflet Core -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Full Screen Toggle -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.fullscreen/Control.FullScreen.css" />
+<script src="https://unpkg.com/leaflet.fullscreen/Control.FullScreen.js"></script>
+
 
   <!-- MarkerCluster -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
@@ -20,17 +25,17 @@
   .leaflet-popup-content p { margin: 4px 0; font-size: 14px; color: #444; }
 
   /* Permanent marker label styling */
-  .marker-label {
-    font-size: 13px;
-    font-weight: 600;
-    color: #222;
-    background: transparent;
-    border: none;
-    box-shadow: none;
-    padding: 0;
-    margin-left: 4px;
-    white-space: nowrap;
-  }
+.marker-label {
+  font-size: 13px;
+  color: #222;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  margin-left: 4px;
+  white-space: nowrap;
+}
+
 </style>
 
 </head>
@@ -41,14 +46,48 @@
   <script>
     var map = L.map("map", { contextmenu: false }).setView([0, 0], 2);
 
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 19,
-      attribution: "&copy; OpenStreetMap contributors"
-    }).addTo(map);
+// Base layers
+var streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19,
+  attribution: '© OpenStreetMap'
+});
+
+var satelliteLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+  maxZoom: 20,
+  subdomains:['mt0','mt1','mt2','mt3']
+});
+
+// Add default layer
+streetLayer.addTo(map);
+
+// Layer toggle control
+L.control.layers(
+  { "Street": streetLayer, "Satellite": satelliteLayer },
+  null,
+  { collapsed: false }
+).addTo(map);
+
+    // Full Screen
+L.control.fullscreen({
+  position: 'topright'
+}).addTo(map);
 
     var filterControl = L.control.layers(null, null, { collapsed: true }).addTo(map);
     var groups = {};
 
+
+var streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19,
+  attribution: '© OpenStreetMap'
+});
+
+var satelliteLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+  maxZoom: 20,
+  subdomains:['mt0','mt1','mt2','mt3']
+});
+
+
+    
     // 1. Broad category → colour map
     var broadCategoryColors = {
       "007": "#FFD700",
@@ -183,9 +222,10 @@ var marker = L.marker(latlng, { icon: icon });
 marker.bindTooltip(feature.properties.name, {
   permanent: true,
   direction: "right",
-  offset: [10, 0],
+  offset: [10, -10],   // moves the label down to center-align with the icon
   className: "marker-label"
 });
+
 
 
 
