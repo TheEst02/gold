@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>TES11</title>
+  <title>TES12</title>
 
   <!-- Leaflet Core -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -34,79 +34,93 @@
 
     var filterControl = L.control.layers(null, null, { collapsed: true }).addTo(map);
     var groups = {};
-// 1. Broad category → colour map
-var broadCategoryColors = {
-  "007": "#FFD700",
-  "EST": "#673AB7",
-  "Art": "#E91E63",
-  "Film": "#FF9800",
-  "Historical & Architecture": "#795548",
-  "Literature": "#3F51B5",
-  "Music": "#009688",
-  "Nature": "#4CAF50",
-  "Wanderlust": "#FF5722"
-};
 
-// 2. Create a cluster group for each broad category
-var broadClusters = {};
-Object.keys(broadCategoryColors).forEach(function(cat) {
-  broadClusters[cat] = L.markerClusterGroup({
-    maxClusterRadius: 50,
-    showCoverageOnHover: false,
-    iconCreateFunction: function(cluster) {
-      var count = cluster.getChildCount();
-      var color = broadCategoryColors[cat];
+    // 1. Broad category → colour map
+    var broadCategoryColors = {
+      "007": "#FFD700",
+      "EST": "#673AB7",
+      "Art": "#E91E63",
+      "Film": "#FF9800",
+      "Historical & Architecture": "#795548",
+      "Literature": "#3F51B5",
+      "Music": "#009688",
+      "Nature": "#4CAF50",
+      "Wanderlust": "#FF5722"
+    };
 
-      return L.divIcon({
-        html: "<div style='background:" + color + "; color:white; border-radius:50%; width:40px; height:40px; display:flex; align-items:center; justify-content:center; font-weight:bold;'>" + count + "</div>",
-        className: "broad-category-cluster",
-        iconSize: [40, 40]
+    // 2. Create a cluster group for each broad category
+    var broadClusters = {};
+    Object.keys(broadCategoryColors).forEach(function(cat) {
+      broadClusters[cat] = L.markerClusterGroup({
+        maxClusterRadius: 50,
+        showCoverageOnHover: false,
+        iconCreateFunction: function(cluster) {
+          var count = cluster.getChildCount();
+          var color = broadCategoryColors[cat];
+
+          return L.divIcon({
+            html: "<div style='background:" + color + "; color:white; border-radius:50%; width:40px; height:40px; display:flex; align-items:center; justify-content:center; font-weight:bold;'>" + count + "</div>",
+            className: "broad-category-cluster",
+            iconSize: [40, 40]
+          });
+        }
       });
+
+      map.addLayer(broadClusters[cat]);
+    });
+
+    // 3. Assign markers to the correct broad category cluster
+    function addMarkerToBroadCluster(feature, marker) {
+      var cat = feature.properties.category;
+
+      if (!broadClusters[cat]) {
+        cat = "Wanderlust"; // fallback
+      }
+
+      broadClusters[cat].addLayer(marker);
     }
-  });
 
-  map.addLayer(broadClusters[cat]);
-});
+    // 4. Tint helper for sub-category colours
+    function tintColor(hex, factor) {
+      var r = parseInt(hex.substr(1,2), 16);
+      var g = parseInt(hex.substr(3,2), 16);
+      var b = parseInt(hex.substr(5,2), 16);
 
-// 3. Assign markers to the correct broad category cluster
-function addMarkerToBroadCluster(feature, marker) {
-  var cat = feature.properties.category;
+      r = Math.min(255, Math.floor(r + (255 - r) * factor));
+      g = Math.min(255, Math.floor(g + (255 - g) * factor));
+      b = Math.min(255, Math.floor(b + (255 - b) * factor));
 
-  // Fallback if category is missing or unknown
-  if (!broadClusters[cat]) {
-    cat = "Wanderlust"; // or choose a default
-  }
+      return "#" + r.toString(16).padStart(2,"0")
+                 + g.toString(16).padStart(2,"0")
+                 + b.toString(16).padStart(2,"0");
+    }
 
-  broadClusters[cat].addLayer(marker);
-}
+    // 5. Sub-category (using "genre") → tinted colour map
+    var subCategoryColors = {};
 
-    // Sub-category (using "genre") → tinted colour map
-var subCategoryColors = {};
+    function getSubCategoryColor(feature) {
+      var broad = feature.properties.category;
+      var sub = feature.properties.genre || "Default";
 
-function getSubCategoryColor(feature) {
-  var broad = feature.properties.category;
-  var sub = feature.properties.genre || "Default";
+      if (subCategoryColors[sub]) return subCategoryColors[sub];
 
-  // If already generated, return it
-  if (subCategoryColors[sub]) return subCategoryColors[sub];
+      var hash = 0;
+      for (var i = 0; i < sub.length; i++) {
+        hash = (hash << 5) - hash + sub.charCodeAt(i);
+        hash |= 0;
+      }
 
-  // Generate a tint factor based on string hash
-  var hash = 0;
-  for (var i = 0; i < sub.length; i++) {
-    hash = (hash << 5) - hash + sub.charCodeAt(i);
-    hash |= 0;
-  }
+      var factor = ((hash % 100) / 100);
+      if (factor < 0) factor = -factor;
 
-  var factor = ((hash % 100) / 100);
-  if (factor < 0) factor = -factor;
+      var baseColor = broadCategoryColors[broad] || "#888888";
+      var tinted = tintColor(baseColor, factor * 0.5);
 
-  var baseColor = broadCategoryColors[broad] || "#888888";
-  var tinted = tintColor(baseColor, factor * 0.5);
+      subCategoryColors[sub] = tinted;
+      return tinted;
+    }
 
-  subCategoryColors[sub] = tinted;
-  return tinted;
-}
-
+    // Legacy markerColors kept but no longer used for colour
     var markerColors = {
       "film location": "red",
       "music location": "blue",
@@ -129,19 +143,20 @@ function getSubCategoryColor(feature) {
         L.geoJSON(data, {
           pointToLayer: function(feature, latlng) {
             var catValue = feature.properties.category || "Default";
-         var clr = getSubCategoryColor(feature);
+            var clr = getSubCategoryColor(feature);
             var marker = L.marker(latlng, { icon: getCustomIcon(clr) });
 
-  if (!groups[catValue]) {
-    groups[catValue] = L.layerGroup();
-    var displayTitle = catValue.split(' ')
-      .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-      .join(' ');
-    filterControl.addOverlay(groups[catValue], displayTitle);
-  }
+            if (!groups[catValue]) {
+              groups[catValue] = L.layerGroup();
+              var displayTitle = catValue.split(' ')
+                .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+                .join(' ');
+              filterControl.addOverlay(groups[catValue], displayTitle);
+            }
 
             groups[catValue].addLayer(marker);
-addMarkerToBroadCluster(feature, marker);
+            addMarkerToBroadCluster(feature, marker);
+
             return marker;
           },
           onEachFeature: function(feature, layer) {
@@ -159,8 +174,16 @@ addMarkerToBroadCluster(feature, marker);
           }
         });
 
-        var allBounds = markersClusterGroup.getBounds();
-        if (allBounds.isValid()) {
+        // Compute bounds from all broad clusters
+        var allBounds = null;
+        Object.keys(broadClusters).forEach(function(cat) {
+          var b = broadClusters[cat].getBounds();
+          if (b.isValid()) {
+            allBounds = allBounds ? allBounds.extend(b) : b;
+          }
+        });
+
+        if (allBounds && allBounds.isValid()) {
           map.fitBounds(allBounds, { padding: [40, 40] });
         }
       })
