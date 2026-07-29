@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>TES26</title>
+  <title>TES27</title>
 
   <!-- Leaflet Core -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -75,7 +75,8 @@ L.control.fullscreen({
     var filterControl = L.control.layers(null, null, { collapsed: true }).addTo(map);
     var groups = {};
 
-
+// Placeholder for franchise/book icons (prevents errors)
+var titleIcons = {};
     
     // 1. Broad category → colour map
     var broadCategoryColors = {
@@ -169,10 +170,6 @@ L.control.fullscreen({
       "literature location": "gold",
       "Default": "green"
     };
-
-    // Placeholder for franchise/book icons (prevents errors)
-var titleIcons = {};
-
 
    function getCustomIcon(iconUrl) {
   return L.icon({
