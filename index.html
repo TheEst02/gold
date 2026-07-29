@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>TES21</title>
+  <title>TES22</title>
 
   <!-- Leaflet Core -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -13,12 +13,26 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
   <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
-  <style>
-    html, body, #map { height: 100%; margin: 0; padding: 0; background: #e5e5e5; }
-    .leaflet-popup-content-wrapper { padding: 14px; border-radius: 8px; font-family: sans-serif; }
-    .leaflet-popup-content h4 { margin: 0 0 6px 0; font-size: 16px; border-bottom: 1px solid #eee; padding-bottom: 4px; color: #111; }
-    .leaflet-popup-content p { margin: 4px 0; font-size: 14px; color: #444; }
-  </style>
+<style>
+  html, body, #map { height: 100%; margin: 0; padding: 0; background: #e5e5e5; }
+  .leaflet-popup-content-wrapper { padding: 14px; border-radius: 8px; font-family: sans-serif; }
+  .leaflet-popup-content h4 { margin: 0 0 6px 0; font-size: 16px; border-bottom: 1px solid #eee; padding-bottom: 4px; color: #111; }
+  .leaflet-popup-content p { margin: 4px 0; font-size: 14px; color: #444; }
+
+  /* Permanent marker label styling */
+  .marker-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #222;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    margin-left: 4px;
+    white-space: nowrap;
+  }
+</style>
+
 </head>
 
 <body oncontextmenu="return false;">
@@ -164,6 +178,15 @@ var icon = L.icon({
 });
 
 var marker = L.marker(latlng, { icon: icon });
+
+// Add permanent name label
+marker.bindTooltip(feature.properties.name, {
+  permanent: true,
+  direction: "right",
+  offset: [10, 0],
+  className: "marker-label"
+});
+
 
 
 
