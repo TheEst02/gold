@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>TES14</title>
+  <title>TES15</title>
 
   <!-- Leaflet Core -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -128,13 +128,14 @@
       "Default": "green"
     };
 
-    function getCustomIcon(colorName) {
-      return L.icon({
-        iconUrl: './' + colorName + '.png',
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34]
-      });
+   function getCustomIcon(iconUrl) {
+  return L.icon({
+    iconUrl: iconUrl,
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -28]
+  });
+}
     }
 
     fetch("./atad-pam.geojson")
