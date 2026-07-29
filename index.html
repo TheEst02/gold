@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>TES22</title>
+  <title>TES23</title>
 
   <!-- Leaflet Core -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -203,7 +203,7 @@ marker.bindTooltip(feature.properties.name, {
 
             return marker;
           },
-        onEachFeature: function(feature, layer) {
+      onEachFeature: function(feature, layer) {
   var p = feature.properties;
 
   var html = `
@@ -212,14 +212,13 @@ marker.bindTooltip(feature.properties.name, {
 
       ${p.description ? `<p><strong>Scene:</strong> ${p.description}</p>` : ""}
       ${p.misc ? `<p><strong>Episode:</strong> ${p.misc}</p>` : ""}
-      ${p.genre ? `<p><strong>Franchise:</strong> ${p.genre}</p>` : ""}
-      ${p.category ? `<p><strong>Category:</strong> ${p.category}</p>` : ""}
-      ${p.popeye ? `<p><strong>Real Location:</strong> ${p.popeye}</p>` : ""}
+      ${p.popeye ? `<p><strong>IRL:</strong> ${p.popeye}</p>` : ""}
     </div>
   `;
 
   layer.bindPopup(html);
 }
+
 
         });
 
