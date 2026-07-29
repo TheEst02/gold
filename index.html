@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>TES09</title>
+  <title>TES10</title>
 
   <!-- Leaflet Core -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -34,8 +34,52 @@
 
     var filterControl = L.control.layers(null, null, { collapsed: true }).addTo(map);
     var groups = {};
-    var markersClusterGroup = L.markerClusterGroup({ maxClusterRadius: 50, showCoverageOnHover: false });
-    map.addLayer(markersClusterGroup);
+// 1. Broad category → colour map
+var broadCategoryColors = {
+  "007": "#FFD700",
+  "EST": "#673AB7",
+  "Art": "#E91E63",
+  "Film": "#FF9800",
+  "Historical & Architecture": "#795548",
+  "Literature": "#3F51B5",
+  "Music": "#009688",
+  "Nature": "#4CAF50",
+  "Wanderlust": "#FF5722"
+};
+
+// 2. Create a cluster group for each broad category
+var broadClusters = {};
+Object.keys(broadCategoryColors).forEach(function(cat) {
+  broadClusters[cat] = L.markerClusterGroup({
+    maxClusterRadius: 50,
+    showCoverageOnHover: false,
+    iconCreateFunction: function(cluster) {
+      var count = cluster.getChildCount();
+      var color = broadCategoryColors[cat];
+
+      return L.divIcon({
+        html: "<div style='background:" + color + "; color:white; border-radius:50%; width:40px; height:40px; display:flex; align-items:center; justify-content:center; font-weight:bold;'>" + count + "</div>",
+        className: "broad-category-cluster",
+        iconSize: [40, 40]
+      });
+    }
+  });
+
+  map.addLayer(broadClusters[cat]);
+});
+
+// 3. Assign markers to the correct broad category cluster
+function addMarkerToBroadCluster(feature, marker) {
+  var cat = feature.properties.category;
+
+  // Fallback if category is missing or unknown
+  if (!broadClusters[cat]) {
+    cat = "Wanderlust"; // or choose a default
+  }
+
+  broadClusters[cat].addLayer(marker);
+}
+
 
     var markerColors = {
       "film location": "red",
@@ -62,13 +106,16 @@
             var clr = markerColors[catValue] || markerColors["Default"];
             var marker = L.marker(latlng, { icon: getCustomIcon(clr) });
 
-            if (!groups[catValue]) {
-              groups[catValue] = L.layerGroup();
-              filterControl.addOverlay(groups[catValue], catValue);
-            }
+  if (!groups[catValue]) {
+    groups[catValue] = L.layerGroup();
+    var displayTitle = catValue.split(' ')
+      .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ');
+    filterControl.addOverlay(groups[catValue], displayTitle);
+  }
 
             groups[catValue].addLayer(marker);
-            markersClusterGroup.addLayer(marker);
+addMarkerToBroadCluster(feature, marker);
             return marker;
           },
           onEachFeature: function(feature, layer) {
