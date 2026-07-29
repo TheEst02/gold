@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>TES19</title>
+  <title>TES20</title>
 
   <!-- Leaflet Core -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -144,16 +144,13 @@
           pointToLayer: function(feature, latlng) {
             var catValue = feature.properties.category || "Default";
             var clr = getSubCategoryColor(feature);
-  var iconUrl = feature.properties.icon;
+ var iconUrl = feature.properties.icon;
 
+// If GeoJSON provides an icon → use it
+// Otherwise → use tinted colour icon
 var icon = iconUrl
-  ? L.icon({
-      iconUrl: iconUrl,
-      iconSize: [25, 41],
-      iconAnchor: [12, 41],
-      popupAnchor: [1, -34]
-    })
-  : getCustomIcon(clr);
+  ? getCustomIcon(iconUrl)
+  : getCustomIcon('./' + clr + '.png');
 
 var marker = L.marker(latlng, { icon: icon });
 
