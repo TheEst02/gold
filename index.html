@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>TES33</title>
+  <title>TES34</title>
 
   <!-- Leaflet Core -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -174,19 +174,21 @@
           },
 
           onEachFeature: function(feature, layer) {
-            var p = feature.properties;
+  var p = feature.properties;
 
-            var html = `
-              <div class="popup">
-                <h4>${p.name || "Untitled Location"}</h4>
-                ${p.description ? `<p><strong>Scene:</strong> ${p.description}</p>` : ""}
-                ${p.misc ? `<p><strong>Episode:</strong> ${p.misc}</p>` : ""}
-                ${p.popeye ? `<p><strong>IRL:</strong> ${p.popeye}</p>` : ""}
-              </div>
-            `;
+  var html = `
+    <div class="popup">
 
-            layer.bindPopup(html);
-          }
+      ${p.misc ? `<p><strong>Episode:</strong> ${p.misc}</p>` : ""}
+      ${p.description ? `<p><strong>Scene:</strong> ${p.description}</p>` : ""}
+      ${p.popeye ? `<p><strong>IRL:</strong> ${p.popeye}</p>` : ""}
+
+    </div>
+  `;
+
+  layer.bindPopup(html);
+}
+
         });
 
         var allBounds = null;
