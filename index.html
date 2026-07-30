@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>TES40</title>
+  <title>TES41</title>
 
   <!-- Leaflet Core -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -99,10 +99,25 @@ var BaseToggle = L.Control.extend({
 
 map.addControl(new BaseToggle());
 
-// Button logic
+    // --- Label Contrast Function ---
+function setLabelContrast(mode) {
+  var labels = document.querySelectorAll('.marker-label');
+  labels.forEach(l => {
+    if (mode === "sat") {
+      l.style.color = "#fff";
+      l.style.textShadow = "0 1px 3px rgba(0,0,0,0.8)";
+    } else {
+      l.style.color = "#222";
+      l.style.textShadow = "0 1px 2px rgba(255,255,255,0.8)";
+    }
+  });
+}
+
+// --- Toggle Button Logic ---
 document.getElementById("btn-map").onclick = function() {
   map.removeLayer(satelliteLayer);
   map.addLayer(streetLayer);
+  setLabelContrast("map");
   this.classList.add("active");
   document.getElementById("btn-sat").classList.remove("active");
 };
@@ -110,9 +125,11 @@ document.getElementById("btn-map").onclick = function() {
 document.getElementById("btn-sat").onclick = function() {
   map.removeLayer(streetLayer);
   map.addLayer(satelliteLayer);
+  setLabelContrast("sat");
   this.classList.add("active");
   document.getElementById("btn-map").classList.remove("active");
 };
+
 
 // Category selector (this stays BELOW the toggle)
 var filterControl = L.control.layers(null, null, { collapsed: true }).addTo(map);
