@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>TES51</title>
+  <title>TES52</title>
 
   <!-- Leaflet Core -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -320,16 +320,15 @@ if (targetId && feature.properties.cUrgLAff === targetId) {
           }
         });
 
-       if (allBounds && allBounds.isValid()) {
+   if (allBounds && allBounds.isValid()) {
 
   // Skip fitBounds if embed is focusing on a specific marker
   if (targetId) {
-    return;
+    return;   // prevents zoom-out
   }
 
   map.fitBounds(allBounds, { padding: [40, 40] });
 }
-
       })
       .catch(err => console.error(err));
   </script>
