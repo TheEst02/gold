@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>TES44</title>
+  <title>TES45</title>
 
   <!-- Leaflet Core -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -71,6 +71,15 @@
 
   <script>
   var map = L.map("map", { contextmenu: false }).setView([0, 0], 2);
+
+// --- URL Parameter Reader (place here every time) ---
+function getParam(name) {
+  const url = new URL(window.location.href);
+  return url.searchParams.get(name);
+}
+
+var targetId = getParam("id");   // e.g. id=cUrgLAff_a91X2
+
 
 // Base layers
 var streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -280,6 +289,16 @@ offset: [13, -19],
     </div>
   `;
 
+// --- Focus map on the marker if ID matches ---
+if (targetId && feature.properties.cUrgLAff === targetId) {
+  layer.on('add', function() {
+    map.setView(layer.getLatLng(), 17);   // zoom level for demo
+    layer.openPopup();                    // auto-open popup
+  });
+}
+
+
+         
   layer.bindPopup(html);
 }
 
