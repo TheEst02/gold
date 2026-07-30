@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>TES48</title>
+  <title>TES49</title>
 
   <!-- Leaflet Core -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -80,6 +80,7 @@ function getParam(name) {
 
 var targetId = getParam("id");
 var viewMode = getParam("view");
+var zoomLevel = parseInt(getParam("zoom")) || 17;
 
 // --- Base layers (REAL definitions) ---
 var streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -298,7 +299,8 @@ offset: [13, -19],
 // --- Focus map on the marker if ID matches ---
 if (targetId && feature.properties.cUrgLAff === targetId) {
   layer.on('add', function() {
-    map.setView(layer.getLatLng(), 17);   // zoom level for demo
+    map.setView(layer.getLatLng(), zoomLevel);
+   // zoom level for demo
     layer.openPopup();                    // auto-open popup
   });
 }
