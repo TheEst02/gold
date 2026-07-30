@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>TES52</title>
+  <title>TES53</title>
 
   <!-- Leaflet Core -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -295,6 +295,7 @@ offset: [13, -19],
       ${p.popeye ? `<p><strong>IRL:</strong> ${p.popeye}</p>` : ""}
     </div>
   `;
+console.log("Checking ID:", feature.properties.cUrgLAff, "vs", targetId);
 
 // --- Focus map on the marker if ID matches ---
 if (targetId && feature.properties.cUrgLAff === targetId) {
