@@ -30,6 +30,31 @@
   white-space: nowrap;
 }
 
+.base-toggle-control {
+  background: white;
+  padding: 6px;
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  font-family: sans-serif;
+  margin-bottom: 8px; /* pushes category selector down */
+}
+
+.toggle-btn {
+  border: none;
+  background: #ddd;
+  padding: 4px 10px;
+  margin: 0 2px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.toggle-btn.active {
+  background: #4CAF50;
+  color: white;
+}
+
+
 </style>
 
 </head>
@@ -38,7 +63,57 @@
   <div id="map"></div>
 
   <script>
-    var map = L.map("map", { contextmenu: false }).setView([0, 0], 2);
+  var map = L.map("map", { contextmenu: false }).setView([0, 0], 2);
+
+// Base layers
+var streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19,
+  attribution: '© OpenStreetMap'
+}).addTo(map);
+
+var satelliteLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+  maxZoom: 20,
+  subdomains:['mt0','mt1','mt2','mt3']
+});
+
+// --- Base Layer Toggle Control ---
+var BaseToggle = L.Control.extend({
+  options: { position: 'topright' },
+
+  onAdd: function(map) {
+    var div = L.DomUtil.create('div', 'base-toggle-control');
+
+    div.innerHTML = `
+      <div class="base-toggle">
+        <button id="btn-map" class="toggle-btn active">Map</button>
+        <button id="btn-sat" class="toggle-btn">Satellite</button>
+      </div>
+    `;
+
+    return div;
+  }
+});
+
+map.addControl(new BaseToggle());
+
+// Button logic
+document.getElementById("btn-map").onclick = function() {
+  map.removeLayer(satelliteLayer);
+  map.addLayer(streetLayer);
+  this.classList.add("active");
+  document.getElementById("btn-sat").classList.remove("active");
+};
+
+document.getElementById("btn-sat").onclick = function() {
+  map.removeLayer(streetLayer);
+  map.addLayer(satelliteLayer);
+  this.classList.add("active");
+  document.getElementById("btn-map").classList.remove("active");
+};
+
+// Category selector (this stays BELOW the toggle)
+var filterControl = L.control.layers(null, null, { collapsed: true }).addTo(map);
+
 
     // Base layer (only OSM)
     var streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
