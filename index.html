@@ -2,16 +2,11 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>TES30</title>
+  <title>TES31</title>
 
   <!-- Leaflet Core -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-    <!-- Full Screen Toggle -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.fullscreen/Control.FullScreen.css" />
-<script src="https://unpkg.com/leaflet.fullscreen/Control.FullScreen.js"></script>
-
 
   <!-- MarkerCluster -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
@@ -24,18 +19,16 @@
   .leaflet-popup-content h4 { margin: 0 0 6px 0; font-size: 16px; border-bottom: 1px solid #eee; padding-bottom: 4px; color: #111; }
   .leaflet-popup-content p { margin: 4px 0; font-size: 14px; color: #444; }
 
-  /* Permanent marker label styling */
-.marker-label {
-  font-size: 13px;
-  color: #222;
-  background: transparent;
-  border: none;
-  box-shadow: none;
-  padding: 0;
-  margin-left: 4px;
-  white-space: nowrap;
-}
-
+  .marker-label {
+    font-size: 13px;
+    color: #222;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    margin-left: 4px;
+    white-space: nowrap;
+  }
 </style>
 
 </head>
@@ -46,39 +39,17 @@
   <script>
     var map = L.map("map", { contextmenu: false }).setView([0, 0], 2);
 
-// Base layers
-var streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  maxZoom: 19,
-  attribution: '© OpenStreetMap'
-});
-
-var satelliteLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
-  maxZoom: 20,
-  subdomains:['mt0','mt1','mt2','mt3']
-});
-
-// Add default layer
-streetLayer.addTo(map);
-
-// Layer toggle control
-L.control.layers(
-  { "Street": streetLayer, "Satellite": satelliteLayer },
-  null,
-  { collapsed: false }
-).addTo(map);
-
-    // Full Screen
-L.control.fullscreen({
-  position: 'topright'
-}).addTo(map);
+    // Base layer (only OSM)
+    var streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap'
+    }).addTo(map);
 
     var filterControl = L.control.layers(null, null, { collapsed: true }).addTo(map);
     var groups = {};
 
-// Placeholder for franchise/book icons (prevents errors)
-var titleIcons = {};
-    
-    // 1. Broad category → colour map
+    var titleIcons = {};
+
     var broadCategoryColors = {
       "007": "#FFD700",
       "EST": "#673AB7",
@@ -91,7 +62,6 @@ var titleIcons = {};
       "Wanderlust": "#FF5722"
     };
 
-    // 2. Create a cluster group for each broad category
     var broadClusters = {};
     Object.keys(broadCategoryColors).forEach(function(cat) {
       broadClusters[cat] = L.markerClusterGroup({
@@ -112,18 +82,12 @@ var titleIcons = {};
       map.addLayer(broadClusters[cat]);
     });
 
-    // 3. Assign markers to the correct broad category cluster
     function addMarkerToBroadCluster(feature, marker) {
       var cat = feature.properties.category;
-
-      if (!broadClusters[cat]) {
-        cat = "Wanderlust"; // fallback
-      }
-
+      if (!broadClusters[cat]) cat = "Wanderlust";
       broadClusters[cat].addLayer(marker);
     }
 
-    // 4. Tint helper for sub-category colours
     function tintColor(hex, factor) {
       var r = parseInt(hex.substr(1,2), 16);
       var g = parseInt(hex.substr(3,2), 16);
@@ -138,7 +102,6 @@ var titleIcons = {};
                  + b.toString(16).padStart(2,"0");
     }
 
-    // 5. Sub-category (using "genre") → tinted colour map
     var subCategoryColors = {};
 
     function getSubCategoryColor(feature) {
@@ -163,22 +126,6 @@ var titleIcons = {};
       return tinted;
     }
 
-    // Legacy markerColors kept but no longer used for colour
-    var markerColors = {
-      "film location": "red",
-      "music location": "blue",
-      "literature location": "gold",
-      "Default": "green"
-    };
-
-   function getCustomIcon(iconUrl) {
-  return L.icon({
-    iconUrl: iconUrl,
-    iconSize: [32, 32],
-    iconAnchor: [16, 32],
-    popupAnchor: [0, -28]
-  });
-}    
     fetch("atad-pam.geojson")
       .then(res => res.json())
       .then(data => {
@@ -186,39 +133,29 @@ var titleIcons = {};
           pointToLayer: function(feature, latlng) {
             var catValue = feature.properties.category || "Default";
             var clr = getSubCategoryColor(feature);
-var iconUrl = feature.properties.finger;
-var genre = feature.properties.genre;
+            var iconUrl = feature.properties.finger;
+            var genre = feature.properties.genre;
 
-// Priority:
-// 1. GeoJSON-provided icon (finger)
-// 2. Film/book title icon (if defined)
-// 3. Tinted fallback icon
-var finalIconUrl =
-  iconUrl ||
-  titleIcons[genre] ||
-  'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhZF7c_TPBSf3eofsWTvLDqg6rRDCD_VVxrO8eAjmoMNVHaZhV4gy5qwS3XQnrExNezoQ4k8_BnAjIJk3oNWbvZWMs5X0VrlzRvwSnHPGfcOEvnSNkESFMwBIXFL8S772gzN5utu2bFL6VAeKr_dxb3I5PSP5BsQ3eBn-sWbi-bUYqQdMTh3YM13Ryd670/s64/mm_film_star_wars.png';
+            var finalIconUrl =
+              iconUrl ||
+              titleIcons[genre] ||
+              'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhZF7c_TPBSf3eofsWTvLDqg6rRDCD_VVxrO8eAjmoMNVHaZhV4gy5qwS3XQnrExNezoQ4k8_BnAjIJk3oNWbvZWMs5X0VrlzRvwSnHPGfcOEvnSNkESFMwBIXFL8S772gzN5utu2bFL6VAeKr_dxb3I5PSP5BsQ3eBn-sWbi-bUYqQdMTh3YM13Ryd670/s64/mm_film_star_wars.png';
 
+            var icon = L.icon({
+              iconUrl: finalIconUrl,
+              iconSize: [32, 32],
+              iconAnchor: [16, 32],
+              popupAnchor: [0, -28]
+            });
 
-var icon = L.icon({
-  iconUrl: finalIconUrl,
-  iconSize: [32, 32],
-  iconAnchor: [16, 32],
-  popupAnchor: [0, -28]
-});
+            var marker = L.marker(latlng, { icon: icon });
 
-var marker = L.marker(latlng, { icon: icon });
-
-// Add permanent name label
-marker.bindTooltip(feature.properties.name, {
-  permanent: true,
-  direction: "right",
-  offset: [10, -10],   // moves the label down to center-align with the icon
-  className: "marker-label"
-});
-
-
-
-
+            marker.bindTooltip(feature.properties.name, {
+              permanent: true,
+              direction: "right",
+              offset: [10, -10],
+              className: "marker-label"
+            });
 
             if (!groups[catValue]) {
               groups[catValue] = L.layerGroup();
@@ -233,26 +170,23 @@ marker.bindTooltip(feature.properties.name, {
 
             return marker;
           },
-      onEachFeature: function(feature, layer) {
-  var p = feature.properties;
 
-  var html = `
-    <div class="popup">
-      <h4>${p.name || "Untitled Location"}</h4>
+          onEachFeature: function(feature, layer) {
+            var p = feature.properties;
 
-      ${p.description ? `<p><strong>Scene:</strong> ${p.description}</p>` : ""}
-      ${p.misc ? `<p><strong>Episode:</strong> ${p.misc}</p>` : ""}
-      ${p.popeye ? `<p><strong>IRL:</strong> ${p.popeye}</p>` : ""}
-    </div>
-  `;
+            var html = `
+              <div class="popup">
+                <h4>${p.name || "Untitled Location"}</h4>
+                ${p.description ? `<p><strong>Scene:</strong> ${p.description}</p>` : ""}
+                ${p.misc ? `<p><strong>Episode:</strong> ${p.misc}</p>` : ""}
+                ${p.popeye ? `<p><strong>IRL:</strong> ${p.popeye}</p>` : ""}
+              </div>
+            `;
 
-  layer.bindPopup(html);
-}
-
-
+            layer.bindPopup(html);
+          }
         });
 
-        // Compute bounds from all broad clusters
         var allBounds = null;
         Object.keys(broadClusters).forEach(function(cat) {
           var b = broadClusters[cat].getBounds();
