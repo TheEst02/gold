@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>TES47</title>
+  <title>TES48</title>
 
   <!-- Leaflet Core -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -81,9 +81,16 @@ function getParam(name) {
 var targetId = getParam("id");
 var viewMode = getParam("view");
 
-// Base layers
-var streetLayer = ...
-var satelliteLayer = ...
+// --- Base layers (REAL definitions) ---
+var streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19,
+  attribution: '© OpenStreetMap'
+}).addTo(map);
+
+var satelliteLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+  maxZoom: 20,
+  subdomains:['mt0','mt1','mt2','mt3']
+});
 
 // --- Base Layer Toggle Control ---
 var BaseToggle = L.Control.extend({
@@ -101,21 +108,7 @@ var BaseToggle = L.Control.extend({
 });
 map.addControl(new BaseToggle());
 
-// --- NOW place the satellite-startup block ---
-if (viewMode === "sat") {
-  map.removeLayer(streetLayer);
-  map.addLayer(satelliteLayer);
-  setLabelContrast("sat");
-
-  document.getElementById("btn-sat").classList.add("active");
-  document.getElementById("btn-map").classList.remove("active");
-}
-
-// Category selector (this stays BELOW the toggle)
-var filterControl = L.control.layers(null, null, { collapsed: true }).addTo(map);
-
-
-    // --- Label Contrast Function ---
+// --- Label Contrast Function ---
 function setLabelContrast(mode) {
   var labels = document.querySelectorAll('.marker-label');
   labels.forEach(l => {
@@ -127,6 +120,16 @@ function setLabelContrast(mode) {
       l.style.textShadow = "0 1px 2px rgba(255,255,255,0.8)";
     }
   });
+}
+
+// --- Satellite startup (NOW this works) ---
+if (viewMode === "sat") {
+  map.removeLayer(streetLayer);
+  map.addLayer(satelliteLayer);
+  setLabelContrast("sat");
+
+  document.getElementById("btn-sat").classList.add("active");
+  document.getElementById("btn-map").classList.remove("active");
 }
 
 // --- Toggle Button Logic ---
@@ -146,9 +149,9 @@ document.getElementById("btn-sat").onclick = function() {
   document.getElementById("btn-map").classList.remove("active");
 };
 
-
-// Category selector (this stays BELOW the toggle)
+// --- Category selector (only once!) ---
 var filterControl = L.control.layers(null, null, { collapsed: true }).addTo(map);
+
 
     var titleIcons = {};
 
