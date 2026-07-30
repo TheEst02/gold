@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>TES38</title>
+  <title>TES39</title>
 
   <!-- Leaflet Core -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -192,6 +192,9 @@ var filterControl = L.control.layers(null, null, { collapsed: true }).addTo(map)
       return tinted;
     }
 
+var groups = {};   // ← add this here
+
+    
     fetch("atad-pam.geojson")
       .then(res => res.json())
       .then(data => {
