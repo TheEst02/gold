@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>TES36</title>
+  <title>TES38</title>
 
   <!-- Leaflet Core -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -113,16 +113,6 @@ document.getElementById("btn-sat").onclick = function() {
 
 // Category selector (this stays BELOW the toggle)
 var filterControl = L.control.layers(null, null, { collapsed: true }).addTo(map);
-
-
-    // Base layer (only OSM)
-    var streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '© OpenStreetMap'
-    }).addTo(map);
-
-    var filterControl = L.control.layers(null, null, { collapsed: true }).addTo(map);
-    var groups = {};
 
     var titleIcons = {};
 
