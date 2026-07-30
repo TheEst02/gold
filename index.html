@@ -32,18 +32,13 @@
                0 -1px 2px rgba(255,255,255,0.4);
 }
 
-  .marker-label.category-film { background: rgba(255,152,0,0.12); }
-.marker-label.category-literature { background: rgba(63,81,181,0.12); }
-.marker-label.category-music { background: rgba(0,150,136,0.12); }
-
-
 .base-toggle-control {
   background: white;
   padding: 6px;
   border-radius: 6px;
   box-shadow: 0 1px 4px rgba(0,0,0,0.3);
   font-family: sans-serif;
-  margin-bottom: 8px; /* pushes category selector down */
+  margin-bottom: 8px;
 }
 
 .toggle-btn {
@@ -60,29 +55,34 @@
   background: #4CAF50;
   color: white;
 }
-
-
 </style>
 
 </head>
 
 <body oncontextmenu="return false;">
-  <div id="map"></div>
+<div id="map"></div>
 
-  <script>
+<script>
+/* -------------------------------------------------------
+   MAP INITIALISATION
+------------------------------------------------------- */
 var map = L.map("map", { contextmenu: false }).setView([0, 0], 2);
 
-// URL Parameter Reader
+/* -------------------------------------------------------
+   URL PARAMETERS
+------------------------------------------------------- */
 function getParam(name) {
   const url = new URL(window.location.href);
   return url.searchParams.get(name);
 }
 
-var targetId = getParam("id");
-var viewMode = getParam("view");
+var targetId  = getParam("id");
+var viewMode  = getParam("view");
 var zoomLevel = parseInt(getParam("zoom")) || 17;
 
-// --- Base layers (REAL definitions) ---
+/* -------------------------------------------------------
+   BASE LAYERS
+------------------------------------------------------- */
 var streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 19,
   attribution: '© OpenStreetMap'
@@ -93,23 +93,25 @@ var satelliteLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z
   subdomains:['mt0','mt1','mt2','mt3']
 });
 
-// --- Base Layer Toggle Control ---
+/* -------------------------------------------------------
+   BASE LAYER TOGGLE CONTROL
+------------------------------------------------------- */
 var BaseToggle = L.Control.extend({
   options: { position: 'topright' },
   onAdd: function(map) {
     var div = L.DomUtil.create('div', 'base-toggle-control');
     div.innerHTML = `
-      <div class="base-toggle">
-        <button id="btn-map" class="toggle-btn active">Map</button>
-        <button id="btn-sat" class="toggle-btn">Satellite</button>
-      </div>
+      <button id="btn-map" class="toggle-btn active">Map</button>
+      <button id="btn-sat" class="toggle-btn">Satellite</button>
     `;
     return div;
   }
 });
 map.addControl(new BaseToggle());
 
-// --- Label Contrast Function ---
+/* -------------------------------------------------------
+   LABEL CONTRAST
+------------------------------------------------------- */
 function setLabelContrast(mode) {
   var labels = document.querySelectorAll('.marker-label');
   labels.forEach(l => {
@@ -123,7 +125,9 @@ function setLabelContrast(mode) {
   });
 }
 
-// --- Satellite startup (NOW this works) ---
+/* -------------------------------------------------------
+   SATELLITE STARTUP
+------------------------------------------------------- */
 if (viewMode === "sat") {
   map.removeLayer(streetLayer);
   map.addLayer(satelliteLayer);
@@ -133,7 +137,9 @@ if (viewMode === "sat") {
   document.getElementById("btn-map").classList.remove("active");
 }
 
-// --- Toggle Button Logic ---
+/* -------------------------------------------------------
+   TOGGLE BUTTON LOGIC
+------------------------------------------------------- */
 document.getElementById("btn-map").onclick = function() {
   map.removeLayer(satelliteLayer);
   map.addLayer(streetLayer);
@@ -150,187 +156,188 @@ document.getElementById("btn-sat").onclick = function() {
   document.getElementById("btn-map").classList.remove("active");
 };
 
-// --- Category selector (only once!) ---
+/* -------------------------------------------------------
+   CATEGORY SELECTOR
+------------------------------------------------------- */
 var filterControl = L.control.layers(null, null, { collapsed: true }).addTo(map);
 
+/* -------------------------------------------------------
+   CLUSTER SETUP (FIXED: NO ZOOM OVERRIDE)
+------------------------------------------------------- */
+var titleIcons = {};
 
-    var titleIcons = {};
+var broadCategoryColors = {
+  "007": "#FFD700",
+  "EST": "#673AB7",
+  "Art": "#E91E63",
+  "Film": "#FF9800",
+  "Historical & Architecture": "#795548",
+  "Literature": "#3F51B5",
+  "Music": "#009688",
+  "Nature": "#4CAF50",
+  "Wanderlust": "#FF5722"
+};
 
-    var broadCategoryColors = {
-      "007": "#FFD700",
-      "EST": "#673AB7",
-      "Art": "#E91E63",
-      "Film": "#FF9800",
-      "Historical & Architecture": "#795548",
-      "Literature": "#3F51B5",
-      "Music": "#009688",
-      "Nature": "#4CAF50",
-      "Wanderlust": "#FF5722"
-    };
+var broadClusters = {};
 
-    var broadClusters = {};
-    Object.keys(broadCategoryColors).forEach(function(cat) {
-      broadClusters[cat] = L.markerClusterGroup({
-        maxClusterRadius: 50,
-        showCoverageOnHover: false,
-        iconCreateFunction: function(cluster) {
-          var count = cluster.getChildCount();
-          var color = broadCategoryColors[cat];
+Object.keys(broadCategoryColors).forEach(function(cat) {
+  broadClusters[cat] = L.markerClusterGroup({
+    maxClusterRadius: 50,
+    showCoverageOnHover: false,
+    disableClusteringAtZoom: 1,   // ← FIX: prevents zoom override
+    iconCreateFunction: function(cluster) {
+      var count = cluster.getChildCount();
+      var color = broadCategoryColors[cat];
 
-          return L.divIcon({
-            html: "<div style='background:" + color + "; color:white; border-radius:50%; width:40px; height:40px; display:flex; align-items:center; justify-content:center; font-weight:bold;'>" + count + "</div>",
-            className: "broad-category-cluster",
-            iconSize: [40, 40]
-          });
-        }
+      return L.divIcon({
+        html: "<div style='background:" + color + "; color:white; border-radius:50%; width:40px; height:40px; display:flex; align-items:center; justify-content:center; font-weight:bold;'>" + count + "</div>",
+        className: "broad-category-cluster",
+        iconSize: [40, 40]
       });
-
-      map.addLayer(broadClusters[cat]);
-    });
-
-    function addMarkerToBroadCluster(feature, marker) {
-      var cat = feature.properties.category;
-      if (!broadClusters[cat]) cat = "Wanderlust";
-      broadClusters[cat].addLayer(marker);
     }
+  });
 
-    function tintColor(hex, factor) {
-      var r = parseInt(hex.substr(1,2), 16);
-      var g = parseInt(hex.substr(3,2), 16);
-      var b = parseInt(hex.substr(5,2), 16);
-
-      r = Math.min(255, Math.floor(r + (255 - r) * factor));
-      g = Math.min(255, Math.floor(g + (255 - g) * factor));
-      b = Math.min(255, Math.floor(b + (255 - b) * factor));
-
-      return "#" + r.toString(16).padStart(2,"0")
-                 + g.toString(16).padStart(2,"0")
-                 + b.toString(16).padStart(2,"0");
-    }
-
-    var subCategoryColors = {};
-
-    function getSubCategoryColor(feature) {
-      var broad = feature.properties.category;
-      var sub = feature.properties.genre || "Default";
-
-      if (subCategoryColors[sub]) return subCategoryColors[sub];
-
-      var hash = 0;
-      for (var i = 0; i < sub.length; i++) {
-        hash = (hash << 5) - hash + sub.charCodeAt(i);
-        hash |= 0;
-      }
-
-      var factor = ((hash % 100) / 100);
-      if (factor < 0) factor = -factor;
-
-      var baseColor = broadCategoryColors[broad] || "#888888";
-      var tinted = tintColor(baseColor, factor * 0.5);
-
-      subCategoryColors[sub] = tinted;
-      return tinted;
-    }
-
-var groups = {};   // ← add this here
-
-    
-    fetch("atad-pam.geojson")
-      .then(res => res.json())
-      .then(data => {
-        L.geoJSON(data, {
-          pointToLayer: function(feature, latlng) {
-            var catValue = feature.properties.category || "Default";
-            var clr = getSubCategoryColor(feature);
-            var iconUrl = feature.properties.finger;
-            var genre = feature.properties.genre;
-
-            var finalIconUrl =
-              iconUrl ||
-              titleIcons[genre] ||
-              'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhZF7c_TPBSf3eofsWTvLDqg6rRDCD_VVxrO8eAjmoMNVHaZhV4gy5qwS3XQnrExNezoQ4k8_BnAjIJk3oNWbvZWMs5X0VrlzRvwSnHPGfcOEvnSNkESFMwBIXFL8S772gzN5utu2bFL6VAeKr_dxb3I5PSP5BsQ3eBn-sWbi-bUYqQdMTh3YM13Ryd670/s64/mm_film_star_wars.png';
-
-            var icon = L.icon({
-              iconUrl: finalIconUrl,
-              iconSize: [32, 32],
-              iconAnchor: [16, 32],
-              popupAnchor: [0, -28]
-            });
-
-            var marker = L.marker(latlng, { icon: icon });
-
-        marker.bindTooltip(feature.properties.name, {
-  permanent: true,
-  direction: "right",
-offset: [13, -19],
-  className: "marker-label"
+  map.addLayer(broadClusters[cat]);
 });
 
+/* -------------------------------------------------------
+   SUBCATEGORY COLOURING
+------------------------------------------------------- */
+function tintColor(hex, factor) {
+  var r = parseInt(hex.substr(1,2), 16);
+  var g = parseInt(hex.substr(3,2), 16);
+  var b = parseInt(hex.substr(5,2), 16);
 
-            if (!groups[catValue]) {
-              groups[catValue] = L.layerGroup();
-              var displayTitle = catValue.split(' ')
-                .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-                .join(' ');
-              filterControl.addOverlay(groups[catValue], displayTitle);
-            }
+  r = Math.min(255, Math.floor(r + (255 - r) * factor));
+  g = Math.min(255, Math.floor(g + (255 - g) * factor));
+  b = Math.min(255, Math.floor(b + (255 - b) * factor));
 
-            groups[catValue].addLayer(marker);
-            addMarkerToBroadCluster(feature, marker);
-
-            return marker;
-          },
-
-       onEachFeature: function(feature, layer) {
-  var p = feature.properties;
-
-  var html = `
-    <div class="popup">
-      <h4>${p.name || "Untitled Location"}</h4>
-
-      ${p.misc ? `<p>${p.misc}</p>` : ""}
-
-      ${p.description ? `<p><strong>Scene:</strong> ${p.description}</p>` : ""}
-
-      ${p.popeye ? `<p><strong>IRL:</strong> ${p.popeye}</p>` : ""}
-    </div>
-  `;
-console.log("Checking ID:", feature.properties.cUrgLAff, "vs", targetId);
-
-// --- Focus map on the marker if ID matches ---
-if (targetId && feature.properties.cUrgLAff === targetId) {
-  layer.on('add', function() {
-    map.setView(layer.getLatLng(), zoomLevel);
-   // zoom level for demo
-    layer.openPopup();                    // auto-open popup
-  });
+  return "#" + r.toString(16).padStart(2,"0")
+             + g.toString(16).padStart(2,"0")
+             + b.toString(16).padStart(2,"0");
 }
 
+var subCategoryColors = {};
 
-         
-  layer.bindPopup(html);
+function getSubCategoryColor(feature) {
+  var broad = feature.properties.category;
+  var sub = feature.properties.genre || "Default";
+
+  if (subCategoryColors[sub]) return subCategoryColors[sub];
+
+  var hash = 0;
+  for (var i = 0; i < sub.length; i++) {
+    hash = (hash << 5) - hash + sub.charCodeAt(i);
+    hash |= 0;
+  }
+
+  var factor = ((hash % 100) / 100);
+  if (factor < 0) factor = -factor;
+
+  var baseColor = broadCategoryColors[broad] || "#888888";
+  var tinted = tintColor(baseColor, factor * 0.5);
+
+  subCategoryColors[sub] = tinted;
+  return tinted;
 }
 
+/* -------------------------------------------------------
+   GEOJSON LOADING
+------------------------------------------------------- */
+var groups = {};
+
+fetch("atad-pam.geojson")
+  .then(res => res.json())
+  .then(data => {
+
+    L.geoJSON(data, {
+
+      pointToLayer: function(feature, latlng) {
+        var catValue = feature.properties.category || "Default";
+        var clr = getSubCategoryColor(feature);
+        var iconUrl = feature.properties.finger;
+        var genre = feature.properties.genre;
+
+        var finalIconUrl =
+          iconUrl ||
+          titleIcons[genre] ||
+          'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhZF7c_TPBSf3eofsWTvLDqg6rRDCD_VVxrO8eAjmoMNVHaZhV4gy5qwS3XQnrExNezoQ4k8_BnAjIJk3oNWbvZWMs5X0VrlzRvwSnHPGfcOEvnSNkESFMwBIXFL8S772gzN5utu2bFL6VAeKr_dxb3I5PSP5BsQ3eBn-sWbi-bUYqQdMTh3YM13Ryd670/s64/mm_film_star_wars.png';
+
+        var icon = L.icon({
+          iconUrl: finalIconUrl,
+          iconSize: [32, 32],
+          iconAnchor: [16, 32],
+          popupAnchor: [0, -28]
         });
 
-        var allBounds = null;
-        Object.keys(broadClusters).forEach(function(cat) {
-          var b = broadClusters[cat].getBounds();
-          if (b.isValid()) {
-            allBounds = allBounds ? allBounds.extend(b) : b;
-          }
+        var marker = L.marker(latlng, { icon: icon });
+
+        marker.bindTooltip(feature.properties.name, {
+          permanent: true,
+          direction: "right",
+          offset: [13, -19],
+          className: "marker-label"
         });
 
-   if (allBounds && allBounds.isValid()) {
+        if (!groups[catValue]) {
+          groups[catValue] = L.layerGroup();
+          filterControl.addOverlay(groups[catValue], catValue);
+        }
 
-  // Skip fitBounds if embed is focusing on a specific marker
-if (!targetId) {
-  map.fitBounds(allBounds, { padding: [40, 40] });
-}
-ap.fitBounds(allBounds, { padding: [40, 40] });
-}
-      })
-      .catch(err => console.error(err));
-  </script>
+        groups[catValue].addLayer(marker);
+        broadClusters[catValue]?.addLayer(marker);
+
+        return marker;
+      },
+
+      onEachFeature: function(feature, layer) {
+        var p = feature.properties;
+
+        var html = `
+          <div class="popup">
+            <h4>${p.name || "Untitled Location"}</h4>
+            ${p.misc ? `<p>${p.misc}</p>` : ""}
+            ${p.description ? `<p><strong>Scene:</strong> ${p.description}</p>` : ""}
+            ${p.popeye ? `<p><strong>IRL:</strong> ${p.popeye}</p>` : ""}
+          </div>
+        `;
+
+        /* -------------------------------------------------------
+           ID FOCUSING (WORKS NOW)
+        ------------------------------------------------------- */
+        if (targetId && p.cUrgLAff === targetId) {
+          layer.on('add', function() {
+            map.setView(layer.getLatLng(), zoomLevel);
+            layer.openPopup();
+          });
+        }
+
+        layer.bindPopup(html);
+      }
+
+    });
+
+    /* -------------------------------------------------------
+       GLOBAL FITBOUNDS (SKIPPED FOR EMBED)
+    ------------------------------------------------------- */
+    var allBounds = null;
+
+    Object.keys(broadClusters).forEach(function(cat) {
+      var b = broadClusters[cat].getBounds();
+      if (b.isValid()) {
+        allBounds = allBounds ? allBounds.extend(b) : b;
+      }
+    });
+
+    if (allBounds && allBounds.isValid()) {
+      if (!targetId) {
+        map.fitBounds(allBounds, { padding: [40, 40] });
+      }
+    }
+
+  })
+  .catch(err => console.error(err));
+
+</script>
 </body>
 </html>
