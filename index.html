@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>TES45</title>
+  <title>TES46</title>
 
   <!-- Leaflet Core -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -79,7 +79,7 @@ function getParam(name) {
 }
 
 var targetId = getParam("id");   // e.g. id=cUrgLAff_a91X2
-
+var viewMode = getParam("view");   // "sat" or "map"
 
 // Base layers
 var streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -91,6 +91,17 @@ var satelliteLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z
   maxZoom: 20,
   subdomains:['mt0','mt1','mt2','mt3']
 });
+
+    if (viewMode === "sat") {
+  map.removeLayer(streetLayer);
+  map.addLayer(satelliteLayer);
+  setLabelContrast("sat");
+
+  // update button UI
+  document.getElementById("btn-sat").classList.add("active");
+  document.getElementById("btn-map").classList.remove("active");
+}
+
 
 // --- Base Layer Toggle Control ---
 var BaseToggle = L.Control.extend({
