@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>TES56</title>
+  <title>TES57</title>
 
   <!-- Leaflet Core -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -130,4 +130,185 @@ document.getElementById("btn-map").onclick = function() {
   map.addLayer(streetLayer);
   setLabelContrast("map");
   this.classList.add("active");
-  document.get
+  document.getElementById("btn-sat").classList.remove("active");
+};
+
+document.getElementById("btn-sat").onclick = function() {
+  map.removeLayer(streetLayer);
+  map.addLayer(satelliteLayer);
+  setLabelContrast("sat");
+  this.classList.add("active");
+  document.getElementById("btn-map").classList.remove("active");
+};
+
+// --- Category selector ---
+var filterControl = L.control.layers(null, null, { collapsed: true }).addTo(map);
+
+var titleIcons = {};
+
+var broadCategoryColors = {
+  "007": "#FFD700",
+  "EST": "#673AB7",
+  "Art": "#E91E63",
+  "Film": "#FF9800",
+  "Historical & Architecture": "#795548",
+  "Literature": "#3F51B5",
+  "Music": "#009688",
+  "Nature": "#4CAF50",
+  "Wanderlust": "#FF5722"
+};
+
+var broadClusters = {};
+Object.keys(broadCategoryColors).forEach(function(cat) {
+  broadClusters[cat] = L.markerClusterGroup({
+    maxClusterRadius: 50,
+    showCoverageOnHover: false,
+    iconCreateFunction: function(cluster) {
+      var count = cluster.getChildCount();
+      var color = broadCategoryColors[cat];
+
+      return L.divIcon({
+        html: "<div style='background:" + color + "; color:white; border-radius:50%; width:40px; height:40px; display:flex; align-items:center; justify-content:center; font-weight:bold;'>" + count + "</div>",
+        className: "broad-category-cluster",
+        iconSize: [40, 40]
+      });
+    }
+  });
+
+  map.addLayer(broadClusters[cat]);
+});
+
+function addMarkerToBroadCluster(feature, marker) {
+  var cat = feature.properties.category;
+  if (!broadClusters[cat]) cat = "Wanderlust";
+  broadClusters[cat].addLayer(marker);
+}
+
+function tintColor(hex, factor) {
+  var r = parseInt(hex.substr(1,2), 16);
+  var g = parseInt(hex.substr(3,2), 16);
+  var b = parseInt(hex.substr(5,2), 16);
+
+  r = Math.min(255, Math.floor(r + (255 - r) * factor));
+  g = Math.min(255, Math.floor(g + (255 - g) * factor));
+  b = Math.min(255, Math.floor(b + (255 - b) * factor));
+
+  return "#" + r.toString(16).padStart(2,"0")
+             + g.toString(16).padStart(2,"0")
+             + b.toString(16).padStart(2,"0");
+}
+
+var subCategoryColors = {};
+
+function getSubCategoryColor(feature) {
+  var broad = feature.properties.category;
+  var sub = feature.properties.genre || "Default";
+
+  if (subCategoryColors[sub]) return subCategoryColors[sub];
+
+  var hash = 0;
+  for (var i = 0; i < sub.length; i++) {
+    hash = (hash << 5) - hash + sub.charCodeAt(i);
+    hash |= 0;
+  }
+
+  var factor = ((hash % 100) / 100);
+  if (factor < 0) factor = -factor;
+
+  var baseColor = broadCategoryColors[broad] || "#888888";
+  var tinted = tintColor(baseColor, factor * 0.5);
+
+  subCategoryColors[sub] = tinted;
+  return tinted;
+}
+
+var groups = {};
+
+fetch("atad-pam.geojson")
+  .then(res => res.json())
+  .then(data => {
+    L.geoJSON(data, {
+      pointToLayer: function(feature, latlng) {
+        var catValue = feature.properties.category || "Default";
+        var clr = getSubCategoryColor(feature);
+        var iconUrl = feature.properties.finger;
+        var genre = feature.properties.genre;
+
+        var finalIconUrl =
+          iconUrl ||
+          titleIcons[genre] ||
+          'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhZF7c_TPBSf3eofsWTvLDqg6rRDCD_VVxrO8eAjmoMNVHaZhV4gy5qwS3XQnrExNezoQ4k8_BnAjIJk3oNWbvZWMs5X0VrlzRvwSnHPGfcOEvnSNkESFMwBIXFL8S772gzN5utu2bFL6VAeKr_dxb3I5PSP5BsQ3eBn-sWbi-bUYqQdMTh3YM13Ryd670/s64/mm_film_star_wars.png';
+
+        var icon = L.icon({
+          iconUrl: finalIconUrl,
+          iconSize: [32, 32],
+          iconAnchor: [16, 32],
+          popupAnchor: [0, -28]
+        });
+
+        var marker = L.marker(latlng, { icon: icon });
+
+        marker.bindTooltip(feature.properties.name, {
+          permanent: true,
+          direction: "right",
+          offset: [13, -19],
+          className: "marker-label"
+        });
+
+        if (!groups[catValue]) {
+          groups[catValue] = L.layerGroup();
+          var displayTitle = catValue.split(' ')
+            .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+            .join(' ');
+          filterControl.addOverlay(groups[catValue], displayTitle);
+        }
+
+        groups[catValue].addLayer(marker);
+        addMarkerToBroadCluster(feature, marker);
+
+        return marker;
+      },
+
+      onEachFeature: function(feature, layer) {
+        var p = feature.properties;
+
+        var html = `
+          <div class="popup">
+            <h4>${p.name || "Untitled Location"}</h4>
+            ${p.misc ? `<p>${p.misc}</p>` : ""}
+            ${p.description ? `<p><strong>Scene:</strong> ${p.description}</p>` : ""}
+            ${p.popeye ? `<p><strong>IRL:</strong> ${p.popeye}</p>` : ""}
+          </div>
+        `;
+
+        // --- Focus map on the marker if ID matches ---
+        if (targetId && p.cUrgLAff === targetId) {
+          layer.on('add', function() {
+            map.setView(layer.getLatLng(), zoomLevel);
+            layer.openPopup();
+          });
+        }
+
+        layer.bindPopup(html);
+      }
+    });
+
+    var allBounds = null;
+    Object.keys(broadClusters).forEach(function(cat) {
+      var b = broadClusters[cat].getBounds();
+      if (b.isValid()) {
+        allBounds = allBounds ? allBounds.extend(b) : b;
+      }
+    });
+
+    // --- FIX: skip fitBounds for embed ---
+    if (allBounds && allBounds.isValid()) {
+      if (!targetId) {
+        map.fitBounds(allBounds, { padding: [40, 40] });
+      }
+    }
+  })
+  .catch(err => console.error(err));
+</script>
+</body>
+</html>
