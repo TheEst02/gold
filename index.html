@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>TES31</title>
+  <title>TES32</title>
 
   <!-- Leaflet Core -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -150,12 +150,13 @@
 
             var marker = L.marker(latlng, { icon: icon });
 
-            marker.bindTooltip(feature.properties.name, {
-              permanent: true,
-              direction: "right",
-              offset: [10, -10],
-              className: "marker-label"
-            });
+        marker.bindTooltip(feature.properties.name, {
+  permanent: true,
+  direction: "right",
+  offset: [13, -17],   // +3px right, +7px up
+  className: "marker-label"
+});
+
 
             if (!groups[catValue]) {
               groups[catValue] = L.layerGroup();
